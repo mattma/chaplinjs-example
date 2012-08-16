@@ -38,5 +38,14 @@ Handlebars.registerHelper 'with_user', (options) ->
 	context = mediator.user or {}
 	Handlebars.helpers.with.call(this, context, options)
 
-Handlebars.registerHelper 'addTotal', (first, second, fn, inverse) ->
+Handlebars.registerHelper 'plus', (first, second, fn, inverse) ->
 	return parseFloat(first)+parseFloat(second)
+
+Handlebars.registerHelper 'minus', (first, second, fn, inverse) ->
+	return parseFloat(first)-parseFloat(second)
+
+Handlebars.registerHelper 'multiple', (first, second, fn, inverse) ->
+	return parseFloat(first)*parseFloat(second)
+
+Handlebars.registerHelper 'divide', (first, second, fn, inverse) ->
+	return parseFloat(first)/parseFloat(second)

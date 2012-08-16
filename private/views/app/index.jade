@@ -1,9 +1,18 @@
 extends ../layout
 
 block content
-	header.header-container#header-container
-	.container.outer-container
-		#page-container.page-container
-	#footer
+	.wrapper
+		header.header-container#header-container
+		.container.outer-container
+			#page-container.page-container
+		#main
+			#top
+				.top-left-panel
+				.top-center-panel
+				.top-right-panel
+			#bottom
+				.bottom-left-panel
+				.bottom-right-panel
+		#footer
 block scripts
 	//-script(src="/scripts/init.js")

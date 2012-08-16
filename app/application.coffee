@@ -4,6 +4,8 @@ routes = require 'routes'
 SessionController = require 'controllers/session_controller'
 HeaderController = require 'controllers/header_controller'
 FooterController = require 'controllers/footer_controller'
+TopCenterController = require 'controllers/topCenter_controller'
+#TopLeftController = require 'controllers/top_left_controller'
 Layout = require 'views/layout'
 
 # The application object
@@ -53,6 +55,8 @@ module.exports = class Application extends Chaplin.Application
 		new SessionController()
 		new HeaderController()
 		new FooterController()
+		new TopCenterController()
+		#new TopLeftController()
 
 	# Create additional mediator properties
 	# -------------------------------------

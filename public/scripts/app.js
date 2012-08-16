@@ -75,7 +75,7 @@
 })();
 
 window.require.define({"application": function(exports, require, module) {
-  var Application, Chaplin, FooterController, HeaderController, Layout, SessionController, mediator, routes,
+  var Application, Chaplin, FooterController, HeaderController, Layout, SessionController, TopCenterController, mediator, routes,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -90,6 +90,8 @@ window.require.define({"application": function(exports, require, module) {
   HeaderController = require('controllers/header_controller');
 
   FooterController = require('controllers/footer_controller');
+
+  TopCenterController = require('controllers/topCenter_controller');
 
   Layout = require('views/layout');
 
@@ -122,7 +124,8 @@ window.require.define({"application": function(exports, require, module) {
     Application.prototype.initControllers = function() {
       new SessionController();
       new HeaderController();
-      return new FooterController();
+      new FooterController();
+      return new TopCenterController();
     };
 
     Application.prototype.initMediator = function() {
@@ -399,6 +402,77 @@ window.require.define({"controllers/session_controller": function(exports, requi
     };
 
     return SessionController;
+
+  })(Controller);
+  
+}});
+
+window.require.define({"controllers/topCenter_controller": function(exports, require, module) {
+  var Controller, Numbers, TopCenterController, TopCenterView, TopLeftView,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Controller = require('controllers/base/controller');
+
+  Numbers = require('models/numbers');
+
+  TopCenterView = require('views/topCenter_view');
+
+  TopLeftView = require('views/top_left_view');
+
+  module.exports = TopCenterController = (function(_super) {
+
+    __extends(TopCenterController, _super);
+
+    function TopCenterController() {
+      return TopCenterController.__super__.constructor.apply(this, arguments);
+    }
+
+    TopCenterController.prototype.initialize = function() {
+      TopCenterController.__super__.initialize.apply(this, arguments);
+      this.model = new Numbers();
+      this.centerView = new TopCenterView({
+        model: this.model
+      });
+      return this.leftView = new TopLeftView({
+        model: this.model
+      });
+    };
+
+    return TopCenterController;
+
+  })(Controller);
+  
+}});
+
+window.require.define({"controllers/top_left_controller": function(exports, require, module) {
+  var Controller, Numbers, TopLeftController, TopLeftView,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Controller = require('controllers/base/controller');
+
+  Numbers = require('models/numbers');
+
+  TopLeftView = require('views/top_left_view');
+
+  module.exports = TopLeftController = (function(_super) {
+
+    __extends(TopLeftController, _super);
+
+    function TopLeftController() {
+      return TopLeftController.__super__.constructor.apply(this, arguments);
+    }
+
+    TopLeftController.prototype.initialize = function() {
+      TopLeftController.__super__.initialize.apply(this, arguments);
+      this.model = new Numbers();
+      return this.view = new TopLeftView({
+        model: this.model
+      });
+    };
+
+    return TopLeftController;
 
   })(Controller);
   
@@ -682,6 +756,10 @@ window.require.define({"lib/view_helper": function(exports, require, module) {
     context = mediator.user || {};
     return Handlebars.helpers["with"].call(this, context, options);
   });
+
+  Handlebars.registerHelper('addTotal', function(first, second, fn, inverse) {
+    return parseFloat(first) + parseFloat(second);
+  });
   
 }});
 
@@ -803,6 +881,32 @@ window.require.define({"models/header": function(exports, require, module) {
     };
 
     return Header;
+
+  })(Model);
+  
+}});
+
+window.require.define({"models/numbers": function(exports, require, module) {
+  var Model, Numbers,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('models/base/model');
+
+  module.exports = Numbers = (function(_super) {
+
+    __extends(Numbers, _super);
+
+    function Numbers() {
+      return Numbers.__super__.constructor.apply(this, arguments);
+    }
+
+    Numbers.prototype.defaults = {
+      first_number: 0,
+      second_number: 0
+    };
+
+    return Numbers;
 
   })(Model);
   
@@ -1239,5 +1343,176 @@ window.require.define({"views/templates/login": function(exports, require, modul
 
 
     return buffer;});
+}});
+
+window.require.define({"views/templates/topCenter": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<p>\n	<label>First Number: </label>\n	<input type=\"text\" id=\"first_num\" placeholder=\"";
+    foundHelper = helpers.first_number;
+    stack1 = foundHelper || depth0.first_number;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "first_number", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n</p>\n<p>\n	<label>Second Number: </label>\n	<input type=\"text\" id=\"second_num\"  placeholder=\"";
+    foundHelper = helpers.second_number;
+    stack1 = foundHelper || depth0.second_number;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "second_number", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n</p>\n<p>\n	<button>Submit</button>\n</p>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/top_left": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, stack3, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing;
+
+  function program1(depth0,data) {
+    
+    var buffer = "";
+    return buffer;}
+
+    buffer += "<p> First Number: ";
+    foundHelper = helpers.first_number;
+    stack1 = foundHelper || depth0.first_number;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "first_number", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " </p>\n<p> Second Number: ";
+    foundHelper = helpers.second_number;
+    stack1 = foundHelper || depth0.second_number;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "second_number", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " </p>\n<strong> Total: <span id=\"total\">";
+    foundHelper = helpers.second_number;
+    stack1 = foundHelper || depth0.second_number;
+    foundHelper = helpers.first_number;
+    stack2 = foundHelper || depth0.first_number;
+    foundHelper = helpers.addTotal;
+    stack3 = foundHelper || depth0.addTotal;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    if(foundHelper && typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, tmp1); }
+    else { stack1 = blockHelperMissing.call(depth0, stack3, stack2, stack1, tmp1); }
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "</span> </strong>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/topCenter_view": function(exports, require, module) {
+  var TopCenterView, View, mediator, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  mediator = require('mediator');
+
+  template = require('views/templates/topCenter');
+
+  module.exports = TopCenterView = (function(_super) {
+
+    __extends(TopCenterView, _super);
+
+    function TopCenterView() {
+      return TopCenterView.__super__.constructor.apply(this, arguments);
+    }
+
+    TopCenterView.prototype.template = template;
+
+    TopCenterView.prototype.container = '.top-center-panel';
+
+    TopCenterView.prototype.tagName = 'form';
+
+    TopCenterView.prototype.autoRender = true;
+
+    TopCenterView.prototype.obj = null;
+
+    TopCenterView.prototype.initialize = function() {
+      return this.on("change", this.getChangeResult, this);
+    };
+
+    TopCenterView.prototype.events = {
+      'click button': "fireEvent"
+    };
+
+    TopCenterView.prototype.fireEvent = function(e) {
+      var first_val, second_val;
+      e.preventDefault();
+      first_val = this.getFirstValue();
+      second_val = this.getSecondValue();
+      console.log(this.model);
+      this.model.set({
+        "first_number": first_val || 0,
+        "second_number": second_val || 0
+      });
+      return mediator.publish("updateValue");
+    };
+
+    TopCenterView.prototype.getFirstValue = function() {
+      var first;
+      return first = ($("#first_num")).val();
+    };
+
+    TopCenterView.prototype.getSecondValue = function() {
+      var second;
+      return second = ($("#second_num")).val();
+    };
+
+    TopCenterView.prototype.getChangeResult = function() {
+      return console.log(this.model.attributes);
+    };
+
+    return TopCenterView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/top_left_view": function(exports, require, module) {
+  var Handlebar, TopLeftView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/top_left');
+
+  Handlebar = require('lib/view_helper');
+
+  module.exports = TopLeftView = (function(_super) {
+
+    __extends(TopLeftView, _super);
+
+    function TopLeftView() {
+      return TopLeftView.__super__.constructor.apply(this, arguments);
+    }
+
+    TopLeftView.prototype.template = template;
+
+    TopLeftView.prototype.container = '.top-left-panel';
+
+    TopLeftView.prototype.initialize = function() {
+      this.render();
+      return this.subscribeEvent("updateValue", this.updateValue);
+    };
+
+    TopLeftView.prototype.updateValue = function() {
+      console.log("get updateValue event");
+      return this.render();
+    };
+
+    TopLeftView.prototype.render = function() {
+      return TopLeftView.__super__.render.apply(this, arguments);
+    };
+
+    return TopLeftView;
+
+  })(View);
+  
 }});
 

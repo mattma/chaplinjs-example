@@ -37,3 +37,6 @@ Handlebars.registerHelper 'without', (context, options) ->
 Handlebars.registerHelper 'with_user', (options) ->
 	context = mediator.user or {}
 	Handlebars.helpers.with.call(this, context, options)
+
+Handlebars.registerHelper 'addTotal', (first, second, fn, inverse) ->
+	return parseFloat(first)+parseFloat(second)

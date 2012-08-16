@@ -87,6 +87,32 @@ window.require.define({"test/controllers/footer_controller_test": function(expor
   
 }});
 
+window.require.define({"test/controllers/topCenter_controller_test": function(exports, require, module) {
+  var TopCenter;
+
+  TopCenter = require('models/topCenter');
+
+  describe('TopCenter', function() {
+    return beforeEach(function() {
+      return this.model = new TopCenter();
+    });
+  });
+  
+}});
+
+window.require.define({"test/controllers/top_left_controller_test": function(exports, require, module) {
+  var TopLeft;
+
+  TopLeft = require('models/top_left');
+
+  describe('TopLeft', function() {
+    return beforeEach(function() {
+      return this.model = new TopLeft();
+    });
+  });
+  
+}});
+
 window.require.define({"test/models/footer": function(exports, require, module) {
   var Footer;
 
@@ -114,6 +140,19 @@ window.require.define({"test/models/header_test": function(exports, require, mod
     });
     return it('should contain 4 items', function() {
       return expect(this.model.get('items')).to.have.length(4);
+    });
+  });
+  
+}});
+
+window.require.define({"test/models/numbers": function(exports, require, module) {
+  var Numbers;
+
+  Numbers = require('models/numbers');
+
+  describe('Numbers', function() {
+    return beforeEach(function() {
+      return this.model = new Numbers();
     });
   });
   
@@ -220,7 +259,35 @@ window.require.define({"test/views/home_page_view_test": function(exports, requi
   
 }});
 
+window.require.define({"test/views/topCenter_view": function(exports, require, module) {
+  var TopCenterView;
+
+  TopCenterView = require('views/topCenter_view');
+
+  describe('TopCenterView', function() {
+    return beforeEach(function() {
+      return this.view = new TopCenterView();
+    });
+  });
+  
+}});
+
+window.require.define({"test/views/top_left_view": function(exports, require, module) {
+  var TopLeftView;
+
+  TopLeftView = require('views/top_left_view');
+
+  describe('TopLeftView', function() {
+    return beforeEach(function() {
+      return this.view = new TopLeftView();
+    });
+  });
+  
+}});
+
 window.require('test/controllers/footer_controller_test');
+window.require('test/controllers/topCenter_controller_test');
+window.require('test/controllers/top_left_controller_test');
 window.require('test/models/header_test');
 window.require('test/views/header_view_test');
 window.require('test/views/home_page_view_test');

@@ -21,8 +21,6 @@ module.exports = class TopCenterView extends View
 		first_val = @getFirstValue()
 		second_val = @getSecondValue()
 
-		console.log @model
-
 		@model.set
 			"first_number": first_val or 0
 			"second_number": second_val or 0

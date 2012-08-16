@@ -1,5 +1,6 @@
 Controller = require 'controllers/base/controller'
 Numbers = require 'models/numbers'
+
 TopCenterView = require 'views/topCenter_view'
 TopLeftView = require 'views/top_left_view'
 TopRightView = require 'views/top_right_view'

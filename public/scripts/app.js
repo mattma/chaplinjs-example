@@ -900,6 +900,19 @@ window.require.define({"models/numbers": function(exports, require, module) {
       second_number: 0
     };
 
+    Numbers.prototype.validation = {
+      first_number: {
+        required: true,
+        range: [1, 10],
+        msg: 'Please enter a number'
+      },
+      second_number: {
+        required: true,
+        range: [1, 10],
+        msg: 'Please enter a number'
+      }
+    };
+
     return Numbers;
 
   })(Model);
@@ -1354,7 +1367,7 @@ window.require.define({"views/templates/bottom_left": function(exports, require,
     var buffer = "";
     return buffer;}
 
-    buffer += "<h3>";
+    buffer += "<h2> Math: Multiply </h2>\r\n<h3>";
     foundHelper = helpers.first_number;
     stack1 = foundHelper || depth0.first_number;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -1421,7 +1434,7 @@ window.require.define({"views/templates/bottom_right": function(exports, require
     var buffer = "";
     return buffer;}
 
-    buffer += "<h3>";
+    buffer += "<h2> Math: Divide </h2>\r\n<h3>";
     foundHelper = helpers.first_number;
     stack1 = foundHelper || depth0.first_number;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -1594,7 +1607,7 @@ window.require.define({"views/templates/top_left": function(exports, require, mo
     var buffer = "";
     return buffer;}
 
-    buffer += "<h3>";
+    buffer += "<h2> Math: Plus </h2>\r\n<h3>";
     foundHelper = helpers.first_number;
     stack1 = foundHelper || depth0.first_number;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -1661,7 +1674,7 @@ window.require.define({"views/templates/top_right": function(exports, require, m
     var buffer = "";
     return buffer;}
 
-    buffer += "<h3>";
+    buffer += "<h2> Math: Minus </h2>\r\n<h3>";
     foundHelper = helpers.first_number;
     stack1 = foundHelper || depth0.first_number;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -1755,7 +1768,6 @@ window.require.define({"views/topCenter_view": function(exports, require, module
       e.preventDefault();
       first_val = this.getFirstValue();
       second_val = this.getSecondValue();
-      console.log(this.model);
       this.model.set({
         "first_number": first_val || 0,
         "second_number": second_val || 0

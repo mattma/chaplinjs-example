@@ -8,11 +8,13 @@ module.exports = class Numbers extends Model
 	validation:
 		first_number:
 			required: true
-			range: [1, 10]
-			msg: 'Please enter a number'
+			pattern: "number"
+			range: [1,15]
+			msg: 'Enter a valid number'
 
 		second_number:
 			required: true
-			range: [1, 10]
-			msg: 'Please enter a number'
+			pattern: "number"
+			range: [1,10]
+			msg: 'Enter a valid number'
 

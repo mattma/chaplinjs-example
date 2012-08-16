@@ -1,4 +1,5 @@
 View = require 'views/base/view'
+Validation = require 'views/templates/backbone.validation-0.6.2'
 mediator = require 'mediator'
 template = require 'views/templates/topCenter'
 
@@ -11,9 +12,11 @@ module.exports = class TopCenterView extends View
 
 	initialize: ->
 		@on "change", @getChangeResult, @
+		Validation.bind @
 
 	events:
 		'click button': "fireEvent"
+		'blur input': 'checkValidate'
 
 	fireEvent: (e)->
 		e.preventDefault()
@@ -25,7 +28,15 @@ module.exports = class TopCenterView extends View
 			"first_number": first_val or 0
 			"second_number": second_val or 0
 
-		mediator.publish "updateValue"
+		console.log @model.isValid()
+
+		if @model.isValid(['first_number', 'second_number'])
+			mediator.publish "updateValue"
+
+	checkValidate: (e)->
+		validator = ($ e.target).attr('name')
+		console.log @model.isValid(validator)
+		#console.log @model.isValid(validator)
 
 	getFirstValue: ->
 		first = ($ "#first_num").val()

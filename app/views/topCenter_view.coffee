@@ -1,5 +1,4 @@
 View = require 'views/base/view'
-Validation = require 'views/templates/backbone.validation-0.6.2'
 mediator = require 'mediator'
 template = require 'views/templates/topCenter'
 
@@ -12,7 +11,6 @@ module.exports = class TopCenterView extends View
 
 	initialize: ->
 		@on "change", @getChangeResult, @
-		Validation.bind @
 
 	events:
 		'click button': "fireEvent"

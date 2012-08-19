@@ -1,3 +1,37 @@
 {{#each links}}
 	<a href="{{href}}">{{name}}</a>
 {{/each}}
+<div> Welcome,
+	<span name="firstName">{{firstName}}</span>
+	<span name="lastName">{{lastName}}</span>
+	<span name="age">{{age}}</span>
+</div>
+<input type="text" name="firstName">
+<input type="text" name="lastName">
+<input type="text" name="age">
+<br><br><br>
+
+Edit your information:<br><br>
+First Name: <input type="text" name="firstName"/><br>
+Last Name: <input type="text" name="lastName"/><br>
+Phone: <input type="text" name="phone"/><br>
+Height: <input type="text" name="height"/><br><br>
+
+Graduated:  Yes: <input type="radio" id="graduated_yes" name="graduated" value="yes">
+No: <input type="radio" id="graduated_no" name="graduated" value="no">
+Maybe: <input type="radio" id="graduated_maybe" name="graduated" value="maybe"><br>
+
+Eye Color:  Green: <input type="radio" name="eyeColor" value="green">
+Blue: <input type="radio" name="eyeColor" value="blue">
+Brown: <input type="radio" name="eyeColor" value="brown"><br><br>
+
+Drivers licence: <input type="checkbox" name="driversLicense"/><br>
+Motorcycle license: <input type="checkbox" name="motorcycle_license" /><br><br>
+Dog:
+<select name="dog">
+<option value="">Please Select</option>
+<option value="1">Andy</option>
+<option value="2">Biff</option>
+<option value="3">Candy</option>
+</select> <br><br>
+Big Text:<br> <textarea name="bigText" rows="4" cols="80"></textarea>

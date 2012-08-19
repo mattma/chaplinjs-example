@@ -7,3 +7,6 @@ module.exports = class Footer extends Model
 			{ href: "http://yahoo.com", name: "kelly"},
 			{ href: "http://google.com", name: "aaron"},
 		]
+		firstName: "matt"
+		lastName: "ma"
+		age: 30

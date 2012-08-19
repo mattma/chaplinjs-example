@@ -473,896 +473,467 @@ window.require.define({"initialize": function(exports, require, module) {
   
 }});
 
-window.require.define({"lib/services/service_provider": function(exports, require, module) {
-  var Chaplin, ServiceProvider, utils;
+window.require.define({"lib/plugins/backbone.modelBinder": function(exports, require, module) {
+  // Backbone.ModelBinder v0.1.5
+  // (c) 2012 Bart Wood
+  // Distributed Under MIT License
 
-  utils = require('lib/utils');
-
-  Chaplin = require('chaplin');
-
-  module.exports = ServiceProvider = (function() {
-
-    _(ServiceProvider.prototype).extend(Chaplin.Subscriber);
-
-    ServiceProvider.prototype.loading = false;
-
-    function ServiceProvider() {
-      _(this).extend($.Deferred());
-      utils.deferMethods({
-        deferred: this,
-        methods: ['triggerLogin', 'getLoginStatus'],
-        onDeferral: this.load
-      });
-    }
-
-    ServiceProvider.prototype.disposed = false;
-
-    ServiceProvider.prototype.dispose = function() {
-      if (this.disposed) {
-        return;
-      }
-      this.unsubscribeAllEvents();
-      this.disposed = true;
-      return typeof Object.freeze === "function" ? Object.freeze(this) : void 0;
-    };
-
-    return ServiceProvider;
-
-  })();
-
-  /*
-
-    Standard methods and their signatures:
-
-    load: ->
-      # Load a script like this:
-      utils.loadLib 'http://example.org/foo.js', @loadHandler, @reject
-
-    loadHandler: =>
-      # Init the library, then resolve
-      ServiceProviderLibrary.init(foo: 'bar')
-      @resolve()
-
-    isLoaded: ->
-      # Return a Boolean
-      Boolean window.ServiceProviderLibrary and ServiceProviderLibrary.login
-
-    # Trigger login popup
-    triggerLogin: (loginContext) ->
-      callback = _(@loginHandler).bind(this, loginContext)
-      ServiceProviderLibrary.login callback
-
-    # Callback for the login popup
-    loginHandler: (loginContext, response) =>
-
-      eventPayload = {provider: this, loginContext}
-      if response
-        # Publish successful login
-        mediator.publish 'loginSuccessful', eventPayload
-
-        # Publish the session
-        mediator.publish 'serviceProviderSession',
-          provider: this
-          userId: response.userId
-          accessToken: response.accessToken
-          # etc.
-
-      else
-        mediator.publish 'loginFail', eventPayload
-
-    getLoginStatus: (callback = @loginStatusHandler, force = false) ->
-      ServiceProviderLibrary.getLoginStatus callback, force
-
-    loginStatusHandler: (response) =>
-      return unless response
-      mediator.publish 'serviceProviderSession',
-        provider: this
-        userId: response.userId
-        accessToken: response.accessToken
-        # etc.
-  */
-
-  
-}});
-
-window.require.define({"lib/support": function(exports, require, module) {
-  var Chaplin, support, utils;
-
-  Chaplin = require('chaplin');
-
-  utils = require('lib/utils');
-
-  support = utils.beget(Chaplin.support);
-
-  module.exports = support;
-  
-}});
-
-window.require.define({"lib/utils": function(exports, require, module) {
-  var Chaplin, mediator, utils,
-    __hasProp = {}.hasOwnProperty;
-
-  Chaplin = require('chaplin');
-
-  mediator = require('mediator');
-
-  utils = Chaplin.utils.beget(Chaplin.utils);
-
-  _(utils).extend({
-    /*
-    	Wrap methods so they can be called before a deferred is resolved.
-    	The actual methods are called once the deferred is resolved.
-    
-    	Parameters:
-    
-    	Expects an options hash with the following properties:
-    
-    	deferred
-    		The Deferred object to wait for.
-    
-    	methods
-    		Either:
-    		- A string with a method name e.g. 'method'
-    		- An array of strings e.g. ['method1', 'method2']
-    		- An object with methods e.g. {method: -> alert('resolved!')}
-    
-    	host (optional)
-    		If you pass an array of strings in the `methods` parameter the methods
-    		are fetched from this object. Defaults to `deferred`.
-    
-    	target (optional)
-    		The target object the new wrapper methods are created at.
-    		Defaults to host if host is given, otherwise it defaults to deferred.
-    
-    	onDeferral (optional)
-    		An additional callback function which is invoked when the method is called
-    		and the Deferred isn't resolved yet.
-    		After the method is registered as a done handler on the Deferred,
-    		this callback is invoked. This can be used to trigger the resolving
-    		of the Deferred.
-    
-    	Examples:
-    
-    	deferMethods(deferred: def, methods: 'foo')
-    		Wrap the method named foo of the given deferred def and
-    		postpone all calls until the deferred is resolved.
-    
-    	deferMethods(deferred: def, methods: def.specialMethods)
-    		Read all methods from the hash def.specialMethods and
-    		create wrapped methods with the same names at def.
-    
-    	deferMethods(
-    		deferred: def, methods: def.specialMethods, target: def.specialMethods
-    	)
-    		Read all methods from the object def.specialMethods and
-    		create wrapped methods at def.specialMethods,
-    		overwriting the existing ones.
-    
-    	deferMethods(deferred: def, host: obj, methods: ['foo', 'bar'])
-    		Wrap the methods obj.foo and obj.bar so all calls to them are postponed
-    		until def is resolved. obj.foo and obj.bar are overwritten
-    		with their wrappers.
-    */
-
-    deferMethods: function(options) {
-      var deferred, func, host, methods, methodsHash, name, onDeferral, target, _i, _len, _results;
-      deferred = options.deferred;
-      methods = options.methods;
-      host = options.host || deferred;
-      target = options.target || host;
-      onDeferral = options.onDeferral;
-      methodsHash = {};
-      if (typeof methods === 'string') {
-        methodsHash[methods] = host[methods];
-      } else if (methods.length && methods[0]) {
-        for (_i = 0, _len = methods.length; _i < _len; _i++) {
-          name = methods[_i];
-          func = host[name];
-          if (typeof func !== 'function') {
-            throw new TypeError("utils.deferMethods: method " + name + " notfound on host " + host);
-          }
-          methodsHash[name] = func;
-        }
+  (function (factory) {
+      if (typeof define === 'function' && define.amd) {
+          // AMD. Register as an anonymous module.
+          define(['underscore', 'jquery', 'backbone'], factory);
       } else {
-        methodsHash = methods;
+          // Browser globals
+          factory(_, $, Backbone);
       }
-      _results = [];
-      for (name in methodsHash) {
-        if (!__hasProp.call(methodsHash, name)) continue;
-        func = methodsHash[name];
-        if (typeof func !== 'function') {
-          continue;
-        }
-        _results.push(target[name] = utils.createDeferredFunction(deferred, func, target, onDeferral));
+  }(function(_, $, Backbone){
+
+      if(!Backbone){
+          throw 'Please include Backbone.js before Backbone.ModelBinder.js';
       }
-      return _results;
-    },
-    createDeferredFunction: function(deferred, func, context, onDeferral) {
-      if (context == null) {
-        context = deferred;
-      }
-      return function() {
-        var args;
-        args = arguments;
-        if (deferred.state() === 'resolved') {
-          return func.apply(context, args);
-        } else {
-          deferred.done(function() {
-            return func.apply(context, args);
-          });
-          if (typeof onDeferral === 'function') {
-            return onDeferral.apply(context);
-          }
-        }
+
+      Backbone.ModelBinder = function(modelSetOptions){
+          _.bindAll(this);
+  	this._modelSetOptions = modelSetOptions || {};
       };
-    }
-  });
 
-  module.exports = utils;
-  
-}});
-
-window.require.define({"lib/view_helper": function(exports, require, module) {
-  var mediator, utils;
-
-  mediator = require('mediator');
-
-  utils = require('chaplin/lib/utils');
-
-  Handlebars.registerHelper('if_logged_in', function(options) {
-    if (mediator.user) {
-      return options.fn(this);
-    } else {
-      return options.inverse(this);
-    }
-  });
-
-  Handlebars.registerHelper('with', function(context, options) {
-    if (!context || Handlebars.Utils.isEmpty(context)) {
-      return options.inverse(this);
-    } else {
-      return options.fn(context);
-    }
-  });
-
-  Handlebars.registerHelper('without', function(context, options) {
-    var inverse;
-    inverse = options.inverse;
-    options.inverse = options.fn;
-    options.fn = inverse;
-    return Handlebars.helpers["with"].call(this, context, options);
-  });
-
-  Handlebars.registerHelper('with_user', function(options) {
-    var context;
-    context = mediator.user || {};
-    return Handlebars.helpers["with"].call(this, context, options);
-  });
-
-  Handlebars.registerHelper('plus', function(first, second, fn, inverse) {
-    return parseFloat(first) + parseFloat(second);
-  });
-
-  Handlebars.registerHelper('minus', function(first, second, fn, inverse) {
-    return parseFloat(first) - parseFloat(second);
-  });
-
-  Handlebars.registerHelper('multiple', function(first, second, fn, inverse) {
-    return parseFloat(first) * parseFloat(second);
-  });
-
-  Handlebars.registerHelper('divide', function(first, second, fn, inverse) {
-    return parseFloat(first) / parseFloat(second);
-  });
-  
-}});
-
-window.require.define({"mediator": function(exports, require, module) {
-  
-  module.exports = require('chaplin').mediator;
-  
-}});
-
-window.require.define({"models/base/collection": function(exports, require, module) {
-  var Chaplin, Collection,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Chaplin = require('chaplin');
-
-  module.exports = Collection = (function(_super) {
-
-    __extends(Collection, _super);
-
-    function Collection() {
-      return Collection.__super__.constructor.apply(this, arguments);
-    }
-
-    return Collection;
-
-  })(Chaplin.Collection);
-  
-}});
-
-window.require.define({"models/base/model": function(exports, require, module) {
-  var Chaplin, Model, Validation, _,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Chaplin = require('chaplin');
-
-  _ = require("underscore");
-
-  Validation = require('views/templates/backbone.validation-0.6.2');
-
-  module.exports = Model = (function(_super) {
-
-    __extends(Model, _super);
-
-    function Model() {
-      return Model.__super__.constructor.apply(this, arguments);
-    }
-
-    Model.prototype.initialize = function() {
-      return _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
-    };
-
-    return Model;
-
-  })(Chaplin.Model);
-  
-}});
-
-window.require.define({"models/footer": function(exports, require, module) {
-  var Footer, Model,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Model = require('models/base/model');
-
-  module.exports = Footer = (function(_super) {
-
-    __extends(Footer, _super);
-
-    function Footer() {
-      return Footer.__super__.constructor.apply(this, arguments);
-    }
-
-    Footer.prototype.defaults = {
-      links: [
-        {
-          href: "http://mattmadesign.com",
-          name: "mattma"
-        }, {
-          href: "http://yahoo.com",
-          name: "kelly"
-        }, {
-          href: "http://google.com",
-          name: "aaron"
-        }
-      ]
-    };
-
-    return Footer;
-
-  })(Model);
-  
-}});
-
-window.require.define({"models/header": function(exports, require, module) {
-  var Header, Model,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Model = require('models/base/model');
-
-  module.exports = Header = (function(_super) {
-
-    __extends(Header, _super);
-
-    function Header() {
-      return Header.__super__.constructor.apply(this, arguments);
-    }
-
-    Header.prototype.defaults = {
-      items: [
-        {
-          href: './test/',
-          title: 'App Tests'
-        }, {
-          href: 'http://brunch.readthedocs.org/',
-          title: 'Docs'
-        }, {
-          href: 'https://github.com/brunch/brunch/issues',
-          title: 'Github Issues'
-        }, {
-          href: 'https://github.com/paulmillr/ostio',
-          title: 'Ost.io Example App'
-        }
-      ]
-    };
-
-    return Header;
-
-  })(Model);
-  
-}});
-
-window.require.define({"models/numbers": function(exports, require, module) {
-  var Model, Numbers,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Model = require('models/base/model');
-
-  module.exports = Numbers = (function(_super) {
-
-    __extends(Numbers, _super);
-
-    function Numbers() {
-      return Numbers.__super__.constructor.apply(this, arguments);
-    }
-
-    Numbers.prototype.defaults = {
-      first_number: 0,
-      second_number: 0
-    };
-
-    Numbers.prototype.validation = {
-      first_number: {
-        required: true,
-        pattern: "number",
-        range: [1, 15],
-        msg: 'Enter a valid number'
-      },
-      second_number: {
-        required: true,
-        pattern: "number",
-        range: [1, 10],
-        msg: 'Enter a valid number'
-      }
-    };
-
-    return Numbers;
-
-  })(Model);
-  
-}});
-
-window.require.define({"models/user": function(exports, require, module) {
-  var Model, User,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Model = require('models/base/model');
-
-  module.exports = User = (function(_super) {
-
-    __extends(User, _super);
-
-    function User() {
-      return User.__super__.constructor.apply(this, arguments);
-    }
-
-    return User;
-
-  })(Model);
-  
-}});
-
-window.require.define({"routes": function(exports, require, module) {
-  
-  module.exports = function(match) {
-    match('', 'home#index');
-    return match('#matt', 'home#matt');
-  };
-  
-}});
-
-window.require.define({"routes": function(exports, require, module) {
-  // Generated by CoffeeScript 1.3.1
-  (function() {
-
-    module.exports = function(match) {
-      match('#matt', 'home#matt');
-      return match('', 'home#index');
-    };
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/base/collection_view": function(exports, require, module) {
-  var Chaplin, CollectionView, View,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Chaplin = require('chaplin');
-
-  View = require('views/base/view');
-
-  module.exports = CollectionView = (function(_super) {
-
-    __extends(CollectionView, _super);
-
-    function CollectionView() {
-      return CollectionView.__super__.constructor.apply(this, arguments);
-    }
-
-    CollectionView.prototype.getTemplateFunction = View.prototype.getTemplateFunction;
-
-    return CollectionView;
-
-  })(Chaplin.CollectionView);
-  
-}});
-
-window.require.define({"views/base/page_view": function(exports, require, module) {
-  var PageView, View, mediator,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  mediator = require('mediator');
-
-  View = require('views/base/view');
-
-  module.exports = PageView = (function(_super) {
-
-    __extends(PageView, _super);
-
-    function PageView() {
-      return PageView.__super__.constructor.apply(this, arguments);
-    }
-
-    PageView.prototype.container = '#page-container';
-
-    PageView.prototype.autoRender = true;
-
-    PageView.prototype.renderedSubviews = false;
-
-    PageView.prototype.initialize = function() {
-      var rendered,
-        _this = this;
-      PageView.__super__.initialize.apply(this, arguments);
-      if (this.model || this.collection) {
-        rendered = false;
-        return this.modelBind('change', function() {
-          if (!rendered) {
-            _this.render();
+      // Current version of the library.
+      Backbone.ModelBinder.VERSION = '0.1.5';
+      Backbone.ModelBinder.Constants = {};
+      Backbone.ModelBinder.Constants.ModelToView = 'ModelToView';
+      Backbone.ModelBinder.Constants.ViewToModel = 'ViewToModel';
+
+      _.extend(Backbone.ModelBinder.prototype, {
+
+          bind:function (model, rootEl, attributeBindings, modelSetOptions) {
+              this.unbind();
+
+              this._model = model;
+              this._rootEl = rootEl;
+  	        this._modelSetOptions = _.extend({}, this._modelSetOptions, modelSetOptions);
+
+              if (!this._model) throw 'model must be specified';
+              if (!this._rootEl) throw 'rootEl must be specified';
+
+              if(attributeBindings){
+                  // Create a deep clone of the attribute bindings
+                  this._attributeBindings = $.extend(true, {}, attributeBindings);
+
+                  this._initializeAttributeBindings();
+                  this._initializeElBindings();
+              }
+              else {
+                  this._initializeDefaultBindings();
+              }
+
+              this._bindModelToView();
+              this._bindViewToModel();
+          },
+
+          unbind:function () {
+              this._unbindModelToView();
+              this._unbindViewToModel();
+
+              if(this._attributeBindings){
+                  delete this._attributeBindings;
+                  this._attributeBindings = undefined;
+              }
+          },
+
+          // Converts the input bindings, which might just be empty or strings, to binding objects
+          _initializeAttributeBindings:function () {
+              var attributeBindingKey, inputBinding, attributeBinding, elementBindingCount, elementBinding;
+
+              for (attributeBindingKey in this._attributeBindings) {
+                  inputBinding = this._attributeBindings[attributeBindingKey];
+
+                  if (_.isString(inputBinding)) {
+                      attributeBinding = {elementBindings: [{selector: inputBinding}]};
+                  }
+                  else if (_.isArray(inputBinding)) {
+                      attributeBinding = {elementBindings: inputBinding};
+                  }
+                  else if(_.isObject(inputBinding)){
+                      attributeBinding = {elementBindings: [inputBinding]};
+                  }
+                  else {
+                      throw 'Unsupported type passed to Model Binder ' + attributeBinding;
+                  }
+
+                  // Add a linkage from the element binding back to the attribute binding
+                  for(elementBindingCount = 0; elementBindingCount < attributeBinding.elementBindings.length; elementBindingCount++){
+                      elementBinding = attributeBinding.elementBindings[elementBindingCount];
+                      elementBinding.attributeBinding = attributeBinding;
+                  }
+
+                  attributeBinding.attributeName = attributeBindingKey;
+                  this._attributeBindings[attributeBindingKey] = attributeBinding;
+              }
+          },
+
+          // If the bindings are not specified, the default binding is performed on the name attribute
+          _initializeDefaultBindings: function(){
+              var elCount, namedEls, namedEl, name;
+              this._attributeBindings = {};
+              namedEls = $('[name]', this._rootEl);
+
+              for(elCount = 0; elCount < namedEls.length; elCount++){
+                  namedEl = namedEls[elCount];
+                  name = $(namedEl).attr('name');
+
+                  // For elements like radio buttons we only want a single attribute binding with possibly multiple element bindings
+                  if(!this._attributeBindings[name]){
+                      var attributeBinding =  {attributeName: name};
+                      attributeBinding.elementBindings = [{attributeBinding: attributeBinding, boundEls: [namedEl]}];
+                      this._attributeBindings[name] = attributeBinding;
+                  }
+                  else{
+                      this._attributeBindings[name].elementBindings.push({attributeBinding: this._attributeBindings[name], boundEls: [namedEl]});
+                  }
+              }
+          },
+
+          _initializeElBindings:function () {
+              var bindingKey, attributeBinding, bindingCount, elementBinding, foundEls, elCount, el;
+              for (bindingKey in this._attributeBindings) {
+                  attributeBinding = this._attributeBindings[bindingKey];
+
+                  for (bindingCount = 0; bindingCount < attributeBinding.elementBindings.length; bindingCount++) {
+                      elementBinding = attributeBinding.elementBindings[bindingCount];
+                      if (elementBinding.selector === '') {
+                          foundEls = $(this._rootEl);
+                      }
+                      else {
+                          foundEls = $(elementBinding.selector, this._rootEl);
+                      }
+
+                      if (foundEls.length === 0) {
+                          throw 'Bad binding found. No elements returned for binding selector ' + elementBinding.selector;
+                      }
+                      else {
+                          elementBinding.boundEls = [];
+                          for (elCount = 0; elCount < foundEls.length; elCount++) {
+                              el = foundEls[elCount];
+                              elementBinding.boundEls.push(el);
+                          }
+                      }
+                  }
+              }
+          },
+
+          _bindModelToView: function () {
+              this._model.on('change', this._onModelChange, this);
+
+              this.copyModelAttributesToView();
+          },
+
+          // attributesToCopy is an optional parameter - if empty, all attributes
+          // that are bound will be copied.  Otherwise, only attributeBindings specified
+          // in the attributesToCopy are copied.
+          copyModelAttributesToView: function(attributesToCopy){
+              var attributeName, attributeBinding;
+
+              for (attributeName in this._attributeBindings) {
+                  if(attributesToCopy === undefined || _.indexOf(attributesToCopy, attributeName) !== -1){
+                      attributeBinding = this._attributeBindings[attributeName];
+                      this._copyModelToView(attributeBinding);
+                  }
+              }
+          },
+
+          _unbindModelToView: function(){
+              if(this._model){
+                  this._model.off('change', this._onModelChange);
+                  this._model = undefined;
+              }
+          },
+
+          _bindViewToModel:function () {
+              $(this._rootEl).delegate('', 'change', this._onElChanged);
+              // The change event doesn't work properly for contenteditable elements - but blur does
+              $(this._rootEl).delegate('[contenteditable]', 'blur', this._onElChanged);
+          },
+
+          _unbindViewToModel: function(){
+              if(this._rootEl){
+                  $(this._rootEl).undelegate('', 'change', this._onElChanged);
+                  $(this._rootEl).undelegate('[contenteditable]', 'blur', this._onElChanged);
+              }
+          },
+
+          _onElChanged:function (event) {
+              var el, elBindings, elBindingCount, elBinding;
+
+              el = $(event.target)[0];
+              elBindings = this._getElBindings(el);
+
+              for(elBindingCount = 0; elBindingCount < elBindings.length; elBindingCount++){
+                  elBinding = elBindings[elBindingCount];
+                  if (this._isBindingUserEditable(elBinding)) {
+                      this._copyViewToModel(elBinding, el);
+                  }
+              }
+          },
+
+          _isBindingUserEditable: function(elBinding){
+              return elBinding.elAttribute === undefined ||
+                  elBinding.elAttribute === 'text' ||
+                  elBinding.elAttribute === 'html';
+          },
+
+          _getElBindings:function (findEl) {
+              var attributeName, attributeBinding, elementBindingCount, elementBinding, boundElCount, boundEl;
+              var elBindings = [];
+
+              for (attributeName in this._attributeBindings) {
+                  attributeBinding = this._attributeBindings[attributeName];
+
+                  for (elementBindingCount = 0; elementBindingCount < attributeBinding.elementBindings.length; elementBindingCount++) {
+                      elementBinding = attributeBinding.elementBindings[elementBindingCount];
+
+                      for (boundElCount = 0; boundElCount < elementBinding.boundEls.length; boundElCount++) {
+                          boundEl = elementBinding.boundEls[boundElCount];
+
+                          if (boundEl === findEl) {
+                              elBindings.push(elementBinding);
+                          }
+                      }
+                  }
+              }
+
+              return elBindings;
+          },
+
+          _onModelChange:function () {
+              var changedAttribute, attributeBinding;
+
+              for (changedAttribute in this._model.changedAttributes()) {
+                  attributeBinding = this._attributeBindings[changedAttribute];
+
+                  if (attributeBinding) {
+                      this._copyModelToView(attributeBinding);
+                  }
+              }
+          },
+
+          _copyModelToView:function (attributeBinding) {
+              var elementBindingCount, elementBinding, boundElCount, boundEl;
+              var value = this._model.get(attributeBinding.attributeName);
+
+              for (elementBindingCount = 0; elementBindingCount < attributeBinding.elementBindings.length; elementBindingCount++) {
+                  elementBinding = attributeBinding.elementBindings[elementBindingCount];
+
+                  if(!elementBinding.isSetting){
+                      var convertedValue = this._getConvertedValue(Backbone.ModelBinder.Constants.ModelToView, elementBinding, value);
+
+                      for (boundElCount = 0; boundElCount < elementBinding.boundEls.length; boundElCount++) {
+                          boundEl = elementBinding.boundEls[boundElCount];
+                          this._setEl($(boundEl), elementBinding, convertedValue);
+                      }
+                  }
+              }
+          },
+
+          _setEl: function (el, elementBinding, convertedValue) {
+              if (elementBinding.elAttribute) {
+                  this._setElAttribute(el, elementBinding, convertedValue);
+              }
+              else {
+                  this._setElValue(el, convertedValue);
+              }
+          },
+
+          _setElAttribute:function (el, elementBinding, convertedValue) {
+              switch (elementBinding.elAttribute) {
+                  case 'html':
+                      el.html(convertedValue);
+                      break;
+                  case 'text':
+                      el.text(convertedValue);
+                      break;
+                  case 'enabled':
+                      el.attr('disabled', !convertedValue);
+                      break;
+                  case 'displayed':
+                      el[convertedValue ? 'show' : 'hide']();
+                      break;
+                  case 'hidden':
+                      el[convertedValue ? 'hide' : 'show']();
+                      break;
+                  case 'css':
+                      el.css(elementBinding.cssAttribute, convertedValue);
+                      break;
+                  case 'class':
+                      var previousValue = this._model.previous(elementBinding.attributeBinding.attributeName);
+                      if(!_.isUndefined(previousValue)){
+                          previousValue = this._getConvertedValue(Backbone.ModelBinder.Constants.ModelToView, elementBinding, previousValue);
+                          el.removeClass(previousValue);
+                      }
+
+                      if(convertedValue){
+                          el.addClass(convertedValue);
+                      }
+                      break;
+                  default:
+                      el.attr(elementBinding.elAttribute, convertedValue);
+              }
+          },
+
+          _setElValue:function (el, convertedValue) {
+              if(el.attr('type')){
+                  switch (el.attr('type')) {
+                      case 'radio':
+                          if (el.val() === convertedValue) {
+                              el.attr('checked', 'checked');
+                          }
+                          break;
+                      case 'checkbox':
+                          if (convertedValue) {
+                              el.attr('checked', 'checked');
+                          }
+                          else {
+                              el.removeAttr('checked');
+                          }
+                          break;
+                      default:
+                          el.val(convertedValue);
+                  }
+              }
+              else if(el.is('input') || el.is('select') || el.is('textarea')){
+                  el.val(convertedValue);
+              }
+              else {
+                  el.text(convertedValue);
+              }
+          },
+
+          _copyViewToModel: function (elementBinding, el) {
+              if (!elementBinding.isSetting) {
+                  elementBinding.isSetting = true;
+                  this._setModel(elementBinding, $(el));
+
+                  if(elementBinding.converter){
+                      this._copyModelToView(elementBinding.attributeBinding);
+                  }
+
+                  elementBinding.isSetting = false;
+              }
+          },
+
+          _getElValue: function(elementBinding, el){
+              switch (el.attr('type')) {
+                  case 'checkbox':
+                      return el.prop('checked') ? true : false;
+                  default:
+                      if(el.attr('contenteditable') !== undefined){
+                          return el.html();
+                      }
+                      else {
+                          return el.val();
+                      }
+              }
+          },
+
+          _setModel: function (elementBinding, el) {
+              var data = {};
+              var elVal = this._getElValue(elementBinding, el);
+              elVal = this._getConvertedValue(Backbone.ModelBinder.Constants.ViewToModel, elementBinding, elVal);
+              data[elementBinding.attributeBinding.attributeName] = elVal;
+  	        var opts = _.extend({}, this._modelSetOptions, {changeSource: 'ModelBinder'});
+              this._model.set(data, opts);
+          },
+
+          _getConvertedValue: function (direction, elementBinding, value) {
+              if (elementBinding.converter) {
+                  value = elementBinding.converter(direction, value, elementBinding.attributeBinding.attributeName, this._model);
+              }
+
+              return value;
           }
-          return rendered = true;
-        });
-      }
-    };
+      });
 
-    PageView.prototype.renderSubviews = function() {};
+      Backbone.ModelBinder.CollectionConverter = function(collection){
+          this._collection = collection;
 
-    PageView.prototype.render = function() {
-      PageView.__super__.render.apply(this, arguments);
-      if (!this.renderedSubviews) {
-        this.renderSubviews();
-        return this.renderedSubviews = true;
-      }
-    };
+          if(!this._collection){
+              throw 'Collection must be defined';
+          }
+          _.bindAll(this, 'convert');
+      };
 
-    return PageView;
+      _.extend(Backbone.ModelBinder.CollectionConverter.prototype, {
+          convert: function(direction, value){
+              if (direction === Backbone.ModelBinder.Constants.ModelToView) {
+                  return value ? value.id : undefined;
+              }
+              else {
+                  return this._collection.get(value);
+              }
+          }
+      });
 
-  })(View);
+      // A static helper function to create a default set of bindings that you can customize before calling the bind() function
+      // rootEl - where to find all of the bound elements
+      // attributeType - probably 'name' or 'id' in most cases
+      // converter(optional) - the default converter you want applied to all your bindings
+      // elAttribute(optional) - the default elAttribute you want applied to all your bindings
+      Backbone.ModelBinder.createDefaultBindings = function(rootEl, attributeType, converter, elAttribute){
+          var foundEls, elCount, foundEl, attributeName;
+          var bindings = {};
+
+          foundEls = $('[' + attributeType + ']', rootEl);
+
+          for(elCount = 0; elCount < foundEls.length; elCount++){
+              foundEl = foundEls[elCount];
+              attributeName = $(foundEl).attr(attributeType);
+
+              if(!bindings[attributeName]){
+                  var attributeBinding =  {selector: '[' + attributeType + '="' + attributeName + '"]'};
+                  bindings[attributeName] = attributeBinding;
+
+                  if(converter){
+                      bindings[attributeName].converter = converter;
+                  }
+
+                  if(elAttribute){
+                      bindings[attributeName].elAttribute = elAttribute;
+                  }
+              }
+          }
+
+          return bindings;
+      };
+
+      // Helps you to combine 2 sets of bindings
+      Backbone.ModelBinder.combineBindings = function(destination, source){
+          _.each(source, function(value, key){
+              var elementBinding = {selector: value.selector};
+
+              if(value.converter){
+                  elementBinding.converter = value.converter;
+              }
+
+              if(value.elAttribute){
+                  elementBinding.elAttribute = value.elAttribute;
+              }
+
+              if(!destination[key]){
+                  destination[key] = elementBinding;
+              }
+              else {
+                  destination[key] = [destination[key], elementBinding];
+              }
+          });
+      };
+
+
+      return Backbone.ModelBinder;
+
+  }));
   
 }});
 
-window.require.define({"views/base/view": function(exports, require, module) {
-  var Chaplin, View,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Chaplin = require('chaplin');
-
-  require('lib/view_helper');
-
-  module.exports = View = (function(_super) {
-
-    __extends(View, _super);
-
-    function View() {
-      return View.__super__.constructor.apply(this, arguments);
-    }
-
-    View.prototype.getTemplateFunction = function() {
-      return this.template;
-    };
-
-    return View;
-
-  })(Chaplin.View);
-  
-}});
-
-window.require.define({"views/bottom_left_view": function(exports, require, module) {
-  var BottomLeftView, Handlebar, View, template,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  View = require('views/base/view');
-
-  template = require('views/templates/bottom_left');
-
-  Handlebar = require('lib/view_helper');
-
-  module.exports = BottomLeftView = (function(_super) {
-
-    __extends(BottomLeftView, _super);
-
-    function BottomLeftView() {
-      return BottomLeftView.__super__.constructor.apply(this, arguments);
-    }
-
-    BottomLeftView.prototype.template = template;
-
-    BottomLeftView.prototype.container = '.bottom-left-panel';
-
-    BottomLeftView.prototype.initialize = function() {
-      this.render();
-      return this.subscribeEvent("updateValue", this.updateValue);
-    };
-
-    BottomLeftView.prototype.updateValue = function() {
-      console.log("get updateValue event");
-      return this.render();
-    };
-
-    BottomLeftView.prototype.render = function() {
-      return BottomLeftView.__super__.render.apply(this, arguments);
-    };
-
-    return BottomLeftView;
-
-  })(View);
-  
-}});
-
-window.require.define({"views/bottom_right_view": function(exports, require, module) {
-  var BottomRightView, Handlebar, View, template,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  View = require('views/base/view');
-
-  template = require('views/templates/bottom_right');
-
-  Handlebar = require('lib/view_helper');
-
-  module.exports = BottomRightView = (function(_super) {
-
-    __extends(BottomRightView, _super);
-
-    function BottomRightView() {
-      return BottomRightView.__super__.constructor.apply(this, arguments);
-    }
-
-    BottomRightView.prototype.template = template;
-
-    BottomRightView.prototype.container = '.bottom-right-panel';
-
-    BottomRightView.prototype.initialize = function() {
-      this.render();
-      return this.subscribeEvent("updateValue", this.updateValue);
-    };
-
-    BottomRightView.prototype.updateValue = function() {
-      console.log("get updateValue event");
-      return this.render();
-    };
-
-    BottomRightView.prototype.render = function() {
-      return BottomRightView.__super__.render.apply(this, arguments);
-    };
-
-    return BottomRightView;
-
-  })(View);
-  
-}});
-
-window.require.define({"views/footer_view": function(exports, require, module) {
-  var FooterView, View, template,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  View = require('views/base/view');
-
-  template = require('views/templates/footer');
-
-  module.exports = FooterView = (function(_super) {
-
-    __extends(FooterView, _super);
-
-    function FooterView() {
-      return FooterView.__super__.constructor.apply(this, arguments);
-    }
-
-    FooterView.prototype.template = template;
-
-    FooterView.prototype.autoRender = true;
-
-    FooterView.prototype.container = "#footer";
-
-    return FooterView;
-
-  })(View);
-  
-}});
-
-window.require.define({"views/header_view": function(exports, require, module) {
-  var HeaderView, View, mediator, template,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  mediator = require('mediator');
-
-  View = require('views/base/view');
-
-  template = require('views/templates/header');
-
-  module.exports = HeaderView = (function(_super) {
-
-    __extends(HeaderView, _super);
-
-    function HeaderView() {
-      return HeaderView.__super__.constructor.apply(this, arguments);
-    }
-
-    HeaderView.prototype.template = template;
-
-    HeaderView.prototype.id = 'header';
-
-    HeaderView.prototype.className = 'header';
-
-    HeaderView.prototype.container = '#header-container';
-
-    HeaderView.prototype.autoRender = true;
-
-    HeaderView.prototype.initialize = function() {
-      HeaderView.__super__.initialize.apply(this, arguments);
-      this.subscribeEvent('loginStatus', this.render);
-      return this.subscribeEvent('startupController', this.render);
-    };
-
-    return HeaderView;
-
-  })(View);
-  
-}});
-
-window.require.define({"views/home_page_view": function(exports, require, module) {
-  var HomePageView, PageView, template,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  template = require('views/templates/home');
-
-  PageView = require('views/base/page_view');
-
-  module.exports = HomePageView = (function(_super) {
-
-    __extends(HomePageView, _super);
-
-    function HomePageView() {
-      return HomePageView.__super__.constructor.apply(this, arguments);
-    }
-
-    HomePageView.prototype.template = template;
-
-    HomePageView.prototype.className = 'home-page';
-
-    HomePageView.prototype.tagName = 'section';
-
-    return HomePageView;
-
-  })(PageView);
-  
-}});
-
-window.require.define({"views/layout": function(exports, require, module) {
-  var Chaplin, Layout,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Chaplin = require('chaplin');
-
-  module.exports = Layout = (function(_super) {
-
-    __extends(Layout, _super);
-
-    function Layout() {
-      return Layout.__super__.constructor.apply(this, arguments);
-    }
-
-    Layout.prototype.initialize = function() {
-      return Layout.__super__.initialize.apply(this, arguments);
-    };
-
-    return Layout;
-
-  })(Chaplin.Layout);
-  
-}});
-
-window.require.define({"views/login_view": function(exports, require, module) {
-  var LoginView, View, mediator, template, utils,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  mediator = require('mediator');
-
-  utils = require('lib/utils');
-
-  View = require('views/base/view');
-
-  template = require('views/templates/login');
-
-  module.exports = LoginView = (function(_super) {
-
-    __extends(LoginView, _super);
-
-    function LoginView() {
-      return LoginView.__super__.constructor.apply(this, arguments);
-    }
-
-    LoginView.prototype.template = template;
-
-    LoginView.prototype.id = 'login';
-
-    LoginView.prototype.container = '#content-container';
-
-    LoginView.prototype.autoRender = true;
-
-    LoginView.prototype.initialize = function(options) {
-      LoginView.__super__.initialize.apply(this, arguments);
-      return this.initButtons(options.serviceProviders);
-    };
-
-    LoginView.prototype.initButtons = function(serviceProviders) {
-      var buttonSelector, failed, loaded, loginHandler, serviceProvider, serviceProviderName, _results;
-      _results = [];
-      for (serviceProviderName in serviceProviders) {
-        serviceProvider = serviceProviders[serviceProviderName];
-        buttonSelector = "." + serviceProviderName;
-        this.$(buttonSelector).addClass('service-loading');
-        loginHandler = _(this.loginWith).bind(this, serviceProviderName, serviceProvider);
-        this.delegate('click', buttonSelector, loginHandler);
-        loaded = _(this.serviceProviderLoaded).bind(this, serviceProviderName, serviceProvider);
-        serviceProvider.done(loaded);
-        failed = _(this.serviceProviderFailed).bind(this, serviceProviderName, serviceProvider);
-        _results.push(serviceProvider.fail(failed));
-      }
-      return _results;
-    };
-
-    LoginView.prototype.loginWith = function(serviceProviderName, serviceProvider, e) {
-      e.preventDefault();
-      if (!serviceProvider.isLoaded()) {
-        return;
-      }
-      mediator.publish('login:pickService', serviceProviderName);
-      return mediator.publish('!login', serviceProviderName);
-    };
-
-    LoginView.prototype.serviceProviderLoaded = function(serviceProviderName) {
-      return this.$("." + serviceProviderName).removeClass('service-loading');
-    };
-
-    LoginView.prototype.serviceProviderFailed = function(serviceProviderName) {
-      return this.$("." + serviceProviderName).removeClass('service-loading').addClass('service-unavailable').attr('disabled', true).attr('title', "Error connecting. Please check whether you areblocking " + (utils.upcase(serviceProviderName)) + ".");
-    };
-
-    return LoginView;
-
-  })(View);
-  
-}});
-
-window.require.define({"views/templates/backbone.validation-0.6.2": function(exports, require, module) {
+window.require.define({"lib/plugins/backbone.validation-0.6.2": function(exports, require, module) {
   // Backbone.Validation v0.6.2
   //
   // Copyright (c) 2011-2012 Thomas Pedersen
@@ -1923,6 +1494,911 @@ window.require.define({"views/templates/backbone.validation-0.6.2": function(exp
   
 }});
 
+window.require.define({"lib/services/service_provider": function(exports, require, module) {
+  var Chaplin, ServiceProvider, utils;
+
+  utils = require('lib/utils');
+
+  Chaplin = require('chaplin');
+
+  module.exports = ServiceProvider = (function() {
+
+    _(ServiceProvider.prototype).extend(Chaplin.Subscriber);
+
+    ServiceProvider.prototype.loading = false;
+
+    function ServiceProvider() {
+      _(this).extend($.Deferred());
+      utils.deferMethods({
+        deferred: this,
+        methods: ['triggerLogin', 'getLoginStatus'],
+        onDeferral: this.load
+      });
+    }
+
+    ServiceProvider.prototype.disposed = false;
+
+    ServiceProvider.prototype.dispose = function() {
+      if (this.disposed) {
+        return;
+      }
+      this.unsubscribeAllEvents();
+      this.disposed = true;
+      return typeof Object.freeze === "function" ? Object.freeze(this) : void 0;
+    };
+
+    return ServiceProvider;
+
+  })();
+
+  /*
+
+    Standard methods and their signatures:
+
+    load: ->
+      # Load a script like this:
+      utils.loadLib 'http://example.org/foo.js', @loadHandler, @reject
+
+    loadHandler: =>
+      # Init the library, then resolve
+      ServiceProviderLibrary.init(foo: 'bar')
+      @resolve()
+
+    isLoaded: ->
+      # Return a Boolean
+      Boolean window.ServiceProviderLibrary and ServiceProviderLibrary.login
+
+    # Trigger login popup
+    triggerLogin: (loginContext) ->
+      callback = _(@loginHandler).bind(this, loginContext)
+      ServiceProviderLibrary.login callback
+
+    # Callback for the login popup
+    loginHandler: (loginContext, response) =>
+
+      eventPayload = {provider: this, loginContext}
+      if response
+        # Publish successful login
+        mediator.publish 'loginSuccessful', eventPayload
+
+        # Publish the session
+        mediator.publish 'serviceProviderSession',
+          provider: this
+          userId: response.userId
+          accessToken: response.accessToken
+          # etc.
+
+      else
+        mediator.publish 'loginFail', eventPayload
+
+    getLoginStatus: (callback = @loginStatusHandler, force = false) ->
+      ServiceProviderLibrary.getLoginStatus callback, force
+
+    loginStatusHandler: (response) =>
+      return unless response
+      mediator.publish 'serviceProviderSession',
+        provider: this
+        userId: response.userId
+        accessToken: response.accessToken
+        # etc.
+  */
+
+  
+}});
+
+window.require.define({"lib/support": function(exports, require, module) {
+  var Chaplin, support, utils;
+
+  Chaplin = require('chaplin');
+
+  utils = require('lib/utils');
+
+  support = utils.beget(Chaplin.support);
+
+  module.exports = support;
+  
+}});
+
+window.require.define({"lib/utils": function(exports, require, module) {
+  var Chaplin, mediator, utils,
+    __hasProp = {}.hasOwnProperty;
+
+  Chaplin = require('chaplin');
+
+  mediator = require('mediator');
+
+  utils = Chaplin.utils.beget(Chaplin.utils);
+
+  _(utils).extend({
+    /*
+    	Wrap methods so they can be called before a deferred is resolved.
+    	The actual methods are called once the deferred is resolved.
+    
+    	Parameters:
+    
+    	Expects an options hash with the following properties:
+    
+    	deferred
+    		The Deferred object to wait for.
+    
+    	methods
+    		Either:
+    		- A string with a method name e.g. 'method'
+    		- An array of strings e.g. ['method1', 'method2']
+    		- An object with methods e.g. {method: -> alert('resolved!')}
+    
+    	host (optional)
+    		If you pass an array of strings in the `methods` parameter the methods
+    		are fetched from this object. Defaults to `deferred`.
+    
+    	target (optional)
+    		The target object the new wrapper methods are created at.
+    		Defaults to host if host is given, otherwise it defaults to deferred.
+    
+    	onDeferral (optional)
+    		An additional callback function which is invoked when the method is called
+    		and the Deferred isn't resolved yet.
+    		After the method is registered as a done handler on the Deferred,
+    		this callback is invoked. This can be used to trigger the resolving
+    		of the Deferred.
+    
+    	Examples:
+    
+    	deferMethods(deferred: def, methods: 'foo')
+    		Wrap the method named foo of the given deferred def and
+    		postpone all calls until the deferred is resolved.
+    
+    	deferMethods(deferred: def, methods: def.specialMethods)
+    		Read all methods from the hash def.specialMethods and
+    		create wrapped methods with the same names at def.
+    
+    	deferMethods(
+    		deferred: def, methods: def.specialMethods, target: def.specialMethods
+    	)
+    		Read all methods from the object def.specialMethods and
+    		create wrapped methods at def.specialMethods,
+    		overwriting the existing ones.
+    
+    	deferMethods(deferred: def, host: obj, methods: ['foo', 'bar'])
+    		Wrap the methods obj.foo and obj.bar so all calls to them are postponed
+    		until def is resolved. obj.foo and obj.bar are overwritten
+    		with their wrappers.
+    */
+
+    deferMethods: function(options) {
+      var deferred, func, host, methods, methodsHash, name, onDeferral, target, _i, _len, _results;
+      deferred = options.deferred;
+      methods = options.methods;
+      host = options.host || deferred;
+      target = options.target || host;
+      onDeferral = options.onDeferral;
+      methodsHash = {};
+      if (typeof methods === 'string') {
+        methodsHash[methods] = host[methods];
+      } else if (methods.length && methods[0]) {
+        for (_i = 0, _len = methods.length; _i < _len; _i++) {
+          name = methods[_i];
+          func = host[name];
+          if (typeof func !== 'function') {
+            throw new TypeError("utils.deferMethods: method " + name + " notfound on host " + host);
+          }
+          methodsHash[name] = func;
+        }
+      } else {
+        methodsHash = methods;
+      }
+      _results = [];
+      for (name in methodsHash) {
+        if (!__hasProp.call(methodsHash, name)) continue;
+        func = methodsHash[name];
+        if (typeof func !== 'function') {
+          continue;
+        }
+        _results.push(target[name] = utils.createDeferredFunction(deferred, func, target, onDeferral));
+      }
+      return _results;
+    },
+    createDeferredFunction: function(deferred, func, context, onDeferral) {
+      if (context == null) {
+        context = deferred;
+      }
+      return function() {
+        var args;
+        args = arguments;
+        if (deferred.state() === 'resolved') {
+          return func.apply(context, args);
+        } else {
+          deferred.done(function() {
+            return func.apply(context, args);
+          });
+          if (typeof onDeferral === 'function') {
+            return onDeferral.apply(context);
+          }
+        }
+      };
+    }
+  });
+
+  module.exports = utils;
+  
+}});
+
+window.require.define({"lib/view_helper": function(exports, require, module) {
+  var mediator, utils;
+
+  mediator = require('mediator');
+
+  utils = require('chaplin/lib/utils');
+
+  Handlebars.registerHelper('if_logged_in', function(options) {
+    if (mediator.user) {
+      return options.fn(this);
+    } else {
+      return options.inverse(this);
+    }
+  });
+
+  Handlebars.registerHelper('with', function(context, options) {
+    if (!context || Handlebars.Utils.isEmpty(context)) {
+      return options.inverse(this);
+    } else {
+      return options.fn(context);
+    }
+  });
+
+  Handlebars.registerHelper('without', function(context, options) {
+    var inverse;
+    inverse = options.inverse;
+    options.inverse = options.fn;
+    options.fn = inverse;
+    return Handlebars.helpers["with"].call(this, context, options);
+  });
+
+  Handlebars.registerHelper('with_user', function(options) {
+    var context;
+    context = mediator.user || {};
+    return Handlebars.helpers["with"].call(this, context, options);
+  });
+
+  Handlebars.registerHelper('plus', function(first, second, fn, inverse) {
+    return parseFloat(first) + parseFloat(second);
+  });
+
+  Handlebars.registerHelper('minus', function(first, second, fn, inverse) {
+    return parseFloat(first) - parseFloat(second);
+  });
+
+  Handlebars.registerHelper('multiple', function(first, second, fn, inverse) {
+    return parseFloat(first) * parseFloat(second);
+  });
+
+  Handlebars.registerHelper('divide', function(first, second, fn, inverse) {
+    return parseFloat(first) / parseFloat(second);
+  });
+  
+}});
+
+window.require.define({"mediator": function(exports, require, module) {
+  
+  module.exports = require('chaplin').mediator;
+  
+}});
+
+window.require.define({"models/base/collection": function(exports, require, module) {
+  var Chaplin, Collection,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Chaplin = require('chaplin');
+
+  module.exports = Collection = (function(_super) {
+
+    __extends(Collection, _super);
+
+    function Collection() {
+      return Collection.__super__.constructor.apply(this, arguments);
+    }
+
+    return Collection;
+
+  })(Chaplin.Collection);
+  
+}});
+
+window.require.define({"models/base/model": function(exports, require, module) {
+  var Chaplin, Model, _,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Chaplin = require('chaplin');
+
+  _ = require("underscore");
+
+  require('lib/plugins/backbone.validation-0.6.2');
+
+  module.exports = Model = (function(_super) {
+
+    __extends(Model, _super);
+
+    function Model() {
+      return Model.__super__.constructor.apply(this, arguments);
+    }
+
+    Model.prototype.initialize = function() {
+      return _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
+    };
+
+    return Model;
+
+  })(Chaplin.Model);
+  
+}});
+
+window.require.define({"models/footer": function(exports, require, module) {
+  var Footer, Model,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('models/base/model');
+
+  module.exports = Footer = (function(_super) {
+
+    __extends(Footer, _super);
+
+    function Footer() {
+      return Footer.__super__.constructor.apply(this, arguments);
+    }
+
+    Footer.prototype.defaults = {
+      links: [
+        {
+          href: "http://mattmadesign.com",
+          name: "mattma"
+        }, {
+          href: "http://yahoo.com",
+          name: "kelly"
+        }, {
+          href: "http://google.com",
+          name: "aaron"
+        }
+      ],
+      firstName: "matt",
+      lastName: "ma",
+      age: 30
+    };
+
+    return Footer;
+
+  })(Model);
+  
+}});
+
+window.require.define({"models/header": function(exports, require, module) {
+  var Header, Model,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('models/base/model');
+
+  module.exports = Header = (function(_super) {
+
+    __extends(Header, _super);
+
+    function Header() {
+      return Header.__super__.constructor.apply(this, arguments);
+    }
+
+    Header.prototype.defaults = {
+      items: [
+        {
+          href: './test/',
+          title: 'App Tests'
+        }, {
+          href: 'http://brunch.readthedocs.org/',
+          title: 'Docs'
+        }, {
+          href: 'https://github.com/brunch/brunch/issues',
+          title: 'Github Issues'
+        }, {
+          href: 'https://github.com/paulmillr/ostio',
+          title: 'Ost.io Example App'
+        }
+      ]
+    };
+
+    return Header;
+
+  })(Model);
+  
+}});
+
+window.require.define({"models/numbers": function(exports, require, module) {
+  var Model, Numbers,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('models/base/model');
+
+  module.exports = Numbers = (function(_super) {
+
+    __extends(Numbers, _super);
+
+    function Numbers() {
+      return Numbers.__super__.constructor.apply(this, arguments);
+    }
+
+    Numbers.prototype.defaults = {
+      first_number: 0,
+      second_number: 0
+    };
+
+    Numbers.prototype.validation = {
+      first_number: {
+        required: true,
+        pattern: "number",
+        range: [1, 15],
+        msg: 'Enter a valid number'
+      },
+      second_number: {
+        required: true,
+        pattern: "number",
+        range: [1, 10],
+        msg: 'Enter a valid number'
+      }
+    };
+
+    return Numbers;
+
+  })(Model);
+  
+}});
+
+window.require.define({"models/user": function(exports, require, module) {
+  var Model, User,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('models/base/model');
+
+  module.exports = User = (function(_super) {
+
+    __extends(User, _super);
+
+    function User() {
+      return User.__super__.constructor.apply(this, arguments);
+    }
+
+    return User;
+
+  })(Model);
+  
+}});
+
+window.require.define({"routes": function(exports, require, module) {
+  
+  module.exports = function(match) {
+    match('', 'home#index');
+    return match('#matt', 'home#matt');
+  };
+  
+}});
+
+window.require.define({"routes": function(exports, require, module) {
+  // Generated by CoffeeScript 1.3.1
+  (function() {
+
+    module.exports = function(match) {
+      match('#matt', 'home#matt');
+      return match('', 'home#index');
+    };
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/base/collection_view": function(exports, require, module) {
+  var Chaplin, CollectionView, View,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Chaplin = require('chaplin');
+
+  View = require('views/base/view');
+
+  module.exports = CollectionView = (function(_super) {
+
+    __extends(CollectionView, _super);
+
+    function CollectionView() {
+      return CollectionView.__super__.constructor.apply(this, arguments);
+    }
+
+    CollectionView.prototype.getTemplateFunction = View.prototype.getTemplateFunction;
+
+    return CollectionView;
+
+  })(Chaplin.CollectionView);
+  
+}});
+
+window.require.define({"views/base/page_view": function(exports, require, module) {
+  var PageView, View, mediator,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  mediator = require('mediator');
+
+  View = require('views/base/view');
+
+  module.exports = PageView = (function(_super) {
+
+    __extends(PageView, _super);
+
+    function PageView() {
+      return PageView.__super__.constructor.apply(this, arguments);
+    }
+
+    PageView.prototype.container = '#page-container';
+
+    PageView.prototype.autoRender = true;
+
+    PageView.prototype.renderedSubviews = false;
+
+    PageView.prototype.initialize = function() {
+      var rendered,
+        _this = this;
+      PageView.__super__.initialize.apply(this, arguments);
+      if (this.model || this.collection) {
+        rendered = false;
+        return this.modelBind('change', function() {
+          if (!rendered) {
+            _this.render();
+          }
+          return rendered = true;
+        });
+      }
+    };
+
+    PageView.prototype.renderSubviews = function() {};
+
+    PageView.prototype.render = function() {
+      PageView.__super__.render.apply(this, arguments);
+      if (!this.renderedSubviews) {
+        this.renderSubviews();
+        return this.renderedSubviews = true;
+      }
+    };
+
+    return PageView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/base/view": function(exports, require, module) {
+  var Chaplin, View,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Chaplin = require('chaplin');
+
+  require('lib/view_helper');
+
+  require('lib/plugins/backbone.modelBinder');
+
+  module.exports = View = (function(_super) {
+
+    __extends(View, _super);
+
+    function View() {
+      return View.__super__.constructor.apply(this, arguments);
+    }
+
+    View.prototype.getTemplateFunction = function() {
+      return this.template;
+    };
+
+    return View;
+
+  })(Chaplin.View);
+  
+}});
+
+window.require.define({"views/bottom_left_view": function(exports, require, module) {
+  var BottomLeftView, Handlebar, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/bottom_left');
+
+  Handlebar = require('lib/view_helper');
+
+  module.exports = BottomLeftView = (function(_super) {
+
+    __extends(BottomLeftView, _super);
+
+    function BottomLeftView() {
+      return BottomLeftView.__super__.constructor.apply(this, arguments);
+    }
+
+    BottomLeftView.prototype.template = template;
+
+    BottomLeftView.prototype.container = '.bottom-left-panel';
+
+    BottomLeftView.prototype.initialize = function() {
+      this.render();
+      return this.subscribeEvent("updateValue", this.updateValue);
+    };
+
+    BottomLeftView.prototype.updateValue = function() {
+      console.log("get updateValue event");
+      return this.render();
+    };
+
+    BottomLeftView.prototype.render = function() {
+      return BottomLeftView.__super__.render.apply(this, arguments);
+    };
+
+    return BottomLeftView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/bottom_right_view": function(exports, require, module) {
+  var BottomRightView, Handlebar, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/bottom_right');
+
+  Handlebar = require('lib/view_helper');
+
+  module.exports = BottomRightView = (function(_super) {
+
+    __extends(BottomRightView, _super);
+
+    function BottomRightView() {
+      return BottomRightView.__super__.constructor.apply(this, arguments);
+    }
+
+    BottomRightView.prototype.template = template;
+
+    BottomRightView.prototype.container = '.bottom-right-panel';
+
+    BottomRightView.prototype.initialize = function() {
+      this.render();
+      return this.subscribeEvent("updateValue", this.updateValue);
+    };
+
+    BottomRightView.prototype.updateValue = function() {
+      console.log("get updateValue event");
+      return this.render();
+    };
+
+    BottomRightView.prototype.render = function() {
+      return BottomRightView.__super__.render.apply(this, arguments);
+    };
+
+    return BottomRightView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/footer_view": function(exports, require, module) {
+  var FooterView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/footer');
+
+  module.exports = FooterView = (function(_super) {
+
+    __extends(FooterView, _super);
+
+    function FooterView() {
+      return FooterView.__super__.constructor.apply(this, arguments);
+    }
+
+    FooterView.prototype.template = template;
+
+    FooterView.prototype.autoRender = true;
+
+    FooterView.prototype.container = "#footer";
+
+    FooterView.prototype.initialize = function() {
+      return this._modelBinder = new Backbone.ModelBinder();
+    };
+
+    FooterView.prototype.render = function() {
+      this.$el.html(template);
+      console.log(this.model.toJSON());
+      this._modelBinder.bind(this.model, this.el);
+      return this;
+    };
+
+    return FooterView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/header_view": function(exports, require, module) {
+  var HeaderView, View, mediator, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  mediator = require('mediator');
+
+  View = require('views/base/view');
+
+  template = require('views/templates/header');
+
+  module.exports = HeaderView = (function(_super) {
+
+    __extends(HeaderView, _super);
+
+    function HeaderView() {
+      return HeaderView.__super__.constructor.apply(this, arguments);
+    }
+
+    HeaderView.prototype.template = template;
+
+    HeaderView.prototype.id = 'header';
+
+    HeaderView.prototype.className = 'header';
+
+    HeaderView.prototype.container = '#header-container';
+
+    HeaderView.prototype.autoRender = true;
+
+    HeaderView.prototype.initialize = function() {
+      HeaderView.__super__.initialize.apply(this, arguments);
+      this.subscribeEvent('loginStatus', this.render);
+      return this.subscribeEvent('startupController', this.render);
+    };
+
+    return HeaderView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/home_page_view": function(exports, require, module) {
+  var HomePageView, PageView, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  template = require('views/templates/home');
+
+  PageView = require('views/base/page_view');
+
+  module.exports = HomePageView = (function(_super) {
+
+    __extends(HomePageView, _super);
+
+    function HomePageView() {
+      return HomePageView.__super__.constructor.apply(this, arguments);
+    }
+
+    HomePageView.prototype.template = template;
+
+    HomePageView.prototype.className = 'home-page';
+
+    HomePageView.prototype.tagName = 'section';
+
+    return HomePageView;
+
+  })(PageView);
+  
+}});
+
+window.require.define({"views/layout": function(exports, require, module) {
+  var Chaplin, Layout,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Chaplin = require('chaplin');
+
+  module.exports = Layout = (function(_super) {
+
+    __extends(Layout, _super);
+
+    function Layout() {
+      return Layout.__super__.constructor.apply(this, arguments);
+    }
+
+    Layout.prototype.initialize = function() {
+      return Layout.__super__.initialize.apply(this, arguments);
+    };
+
+    return Layout;
+
+  })(Chaplin.Layout);
+  
+}});
+
+window.require.define({"views/login_view": function(exports, require, module) {
+  var LoginView, View, mediator, template, utils,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  mediator = require('mediator');
+
+  utils = require('lib/utils');
+
+  View = require('views/base/view');
+
+  template = require('views/templates/login');
+
+  module.exports = LoginView = (function(_super) {
+
+    __extends(LoginView, _super);
+
+    function LoginView() {
+      return LoginView.__super__.constructor.apply(this, arguments);
+    }
+
+    LoginView.prototype.template = template;
+
+    LoginView.prototype.id = 'login';
+
+    LoginView.prototype.container = '#content-container';
+
+    LoginView.prototype.autoRender = true;
+
+    LoginView.prototype.initialize = function(options) {
+      LoginView.__super__.initialize.apply(this, arguments);
+      return this.initButtons(options.serviceProviders);
+    };
+
+    LoginView.prototype.initButtons = function(serviceProviders) {
+      var buttonSelector, failed, loaded, loginHandler, serviceProvider, serviceProviderName, _results;
+      _results = [];
+      for (serviceProviderName in serviceProviders) {
+        serviceProvider = serviceProviders[serviceProviderName];
+        buttonSelector = "." + serviceProviderName;
+        this.$(buttonSelector).addClass('service-loading');
+        loginHandler = _(this.loginWith).bind(this, serviceProviderName, serviceProvider);
+        this.delegate('click', buttonSelector, loginHandler);
+        loaded = _(this.serviceProviderLoaded).bind(this, serviceProviderName, serviceProvider);
+        serviceProvider.done(loaded);
+        failed = _(this.serviceProviderFailed).bind(this, serviceProviderName, serviceProvider);
+        _results.push(serviceProvider.fail(failed));
+      }
+      return _results;
+    };
+
+    LoginView.prototype.loginWith = function(serviceProviderName, serviceProvider, e) {
+      e.preventDefault();
+      if (!serviceProvider.isLoaded()) {
+        return;
+      }
+      mediator.publish('login:pickService', serviceProviderName);
+      return mediator.publish('!login', serviceProviderName);
+    };
+
+    LoginView.prototype.serviceProviderLoaded = function(serviceProviderName) {
+      return this.$("." + serviceProviderName).removeClass('service-loading');
+    };
+
+    LoginView.prototype.serviceProviderFailed = function(serviceProviderName) {
+      return this.$("." + serviceProviderName).removeClass('service-loading').addClass('service-unavailable').attr('disabled', true).attr('title', "Error connecting. Please check whether you areblocking " + (utils.upcase(serviceProviderName)) + ".");
+    };
+
+    return LoginView;
+
+  })(View);
+  
+}});
+
 window.require.define({"views/templates/bottom_left": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -2087,7 +2563,22 @@ window.require.define({"views/templates/footer": function(exports, require, modu
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n";
+    buffer += "\n<div> Welcome,\n	<span name=\"firstName\">";
+    foundHelper = helpers.firstName;
+    stack1 = foundHelper || depth0.firstName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "firstName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</span>\n	<span name=\"lastName\">";
+    foundHelper = helpers.lastName;
+    stack1 = foundHelper || depth0.lastName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "lastName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</span>\n	<span name=\"age\">";
+    foundHelper = helpers.age;
+    stack1 = foundHelper || depth0.age;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "age", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</span>\n</div>\n<input type=\"text\" name=\"firstName\">\n<input type=\"text\" name=\"lastName\">\n<input type=\"text\" name=\"age\">\n<br><br><br>\n\nEdit your information:<br><br>\nFirst Name: <input type=\"text\" name=\"firstName\"/><br>\nLast Name: <input type=\"text\" name=\"lastName\"/><br>\nPhone: <input type=\"text\" name=\"phone\"/><br>\nHeight: <input type=\"text\" name=\"height\"/><br><br>\n\nGraduated:  Yes: <input type=\"radio\" id=\"graduated_yes\" name=\"graduated\" value=\"yes\">\nNo: <input type=\"radio\" id=\"graduated_no\" name=\"graduated\" value=\"no\">\nMaybe: <input type=\"radio\" id=\"graduated_maybe\" name=\"graduated\" value=\"maybe\"><br>\n\nEye Color:  Green: <input type=\"radio\" name=\"eyeColor\" value=\"green\">\nBlue: <input type=\"radio\" name=\"eyeColor\" value=\"blue\">\nBrown: <input type=\"radio\" name=\"eyeColor\" value=\"brown\"><br><br>\n\nDrivers licence: <input type=\"checkbox\" name=\"driversLicense\"/><br>\nMotorcycle license: <input type=\"checkbox\" name=\"motorcycle_license\" /><br><br>\nDog:\n<select name=\"dog\">\n<option value=\"\">Please Select</option>\n<option value=\"1\">Andy</option>\n<option value=\"2\">Biff</option>\n<option value=\"3\">Candy</option>\n</select> <br><br>\nBig Text:<br> <textarea name=\"bigText\" rows=\"4\" cols=\"80\"></textarea>\n";
     return buffer;});
 }});
 

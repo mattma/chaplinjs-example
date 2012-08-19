@@ -198,39 +198,6 @@ window.require.define({"controllers/footer_controller": function(exports, requir
   
 }});
 
-window.require.define({"controllers/form_alt_controller": function(exports, require, module) {
-  var Controller, FormAlt, FormAltView, FormAltsController,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Controller = require('controllers/base/controller');
-
-  FormAlt = require('models/form_alt');
-
-  FormAltView = require('views/templates/form_alt_view');
-
-  module.exports = FormAltsController = (function(_super) {
-
-    __extends(FormAltsController, _super);
-
-    function FormAltsController() {
-      return FormAltsController.__super__.constructor.apply(this, arguments);
-    }
-
-    FormAltsController.prototype.initialize = function() {
-      FormAltsController.__super__.initialize.apply(this, arguments);
-      this.model = new FormAlt();
-      return this.view = new FormAltView({
-        model: this.model
-      });
-    };
-
-    return FormAltsController;
-
-  })(Controller);
-  
-}});
-
 window.require.define({"controllers/form_controller": function(exports, require, module) {
   var Controller, Form, FormController, FormView,
     __hasProp = {}.hasOwnProperty,
@@ -1965,27 +1932,6 @@ window.require.define({"models/form": function(exports, require, module) {
   
 }});
 
-window.require.define({"models/form_alt": function(exports, require, module) {
-  var FormAlt, Model,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Model = require('models/base/model');
-
-  module.exports = FormAlt = (function(_super) {
-
-    __extends(FormAlt, _super);
-
-    function FormAlt() {
-      return FormAlt.__super__.constructor.apply(this, arguments);
-    }
-
-    return FormAlt;
-
-  })(Model);
-  
-}});
-
 window.require.define({"models/header": function(exports, require, module) {
   var Header, Model,
     __hasProp = {}.hasOwnProperty,
@@ -2389,31 +2335,6 @@ window.require.define({"views/footer_view": function(exports, require, module) {
     };
 
     return FooterView;
-
-  })(View);
-  
-}});
-
-window.require.define({"views/form_alt_view": function(exports, require, module) {
-  var FormAltView, View, template,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  View = require('views/base/view');
-
-  template = require('views/templates/form_alt');
-
-  module.exports = FormAltView = (function(_super) {
-
-    __extends(FormAltView, _super);
-
-    function FormAltView() {
-      return FormAltView.__super__.constructor.apply(this, arguments);
-    }
-
-    FormAltView.prototype.template = template;
-
-    return FormAltView;
 
   })(View);
   
@@ -2902,16 +2823,7 @@ window.require.define({"views/templates/form": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<div id=\"viewContent\"></div>\n\n<p>\n	First Name: <input type=\"text\" name=\"first_name\"/>\n</p>\n<p>\n	Phone:<span class=\"highlight\">(Custom Value Updates) <input type=\"text\" name=\"phone\"/>\n</p>\n<p>\n	Height:<span class=\"highlight\">(Custom No Binding Test) </span> <input type=\"text\" name=\"height\"/>\n</p>\n<p>\n	Text Color:  Green: <input type=\"radio\" name=\"text_color\" value=\"green\">\n	Blue: <input type=\"radio\" name=\"text_color\" value=\"blue\">\n	Brown: <input type=\"radio\" name=\"text_color\" value=\"brown\"> <br>\n	<span class=\"label\">This is the color of my eye. Look at the color of the text.</span><br>\n</p>\n<p>\n	Can Drive?:  Yes: <input type=\"radio\" name=\"can_drive\" value=\"yes\">\n	No: <input type=\"radio\" name=\"can_drive\" value=\"no\">\n	Maybe: <input type=\"radio\" name=\"can_drive\" value=\"maybe\"> <br>\n\n	Drivers licence: <input type=\"checkbox\" name=\"drivers_license\"/> <br>\n	Motorcycle license: <input type=\"checkbox\" name=\"motorcycle_license\" /><br>\n</p>\n<p>\nDog: <span class=\"highlight\">(Custom object value binding)</span>\n	<select name=\"dog\">\n		<option value=\"\">Please Select</option>\n		<option value=\"1\">smith</option>\n		<option value=\"2\">Biff</option>\n		<option value=\"3\">Candy</option>\n	</select>\n</p>\n<p>\n	Big Text: <textarea name=\"bigText\" rows=\"6\" cols=\"40\"></textarea>\n</p>\n";});
-}});
-
-window.require.define({"views/templates/form_alt": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", foundHelper, self=this;
-
-
-    return buffer;});
+    return "<div id=\"viewContent\"></div>\n\n<p>\n	First Name: <input type=\"text\" name=\"first_name\"/>\n</p>\n<p>\n	Phone:<span class=\"highlight\">(Custom Value Updates) <input type=\"text\" name=\"phone\"/>\n</p>\n<p>\n	Height:<span class=\"highlight\">(Custom No Binding Test) </span> <input type=\"text\" name=\"height\"/>\n</p>\n<p>\n	Text Color:<span class=\"highlight\">(Dynamic Attribute) </span>  Green: <input type=\"radio\" name=\"text_color\" value=\"green\">\n	Blue: <input type=\"radio\" name=\"text_color\" value=\"blue\">\n	Brown: <input type=\"radio\" name=\"text_color\" value=\"brown\"> <br>\n	<span class=\"label\">This is the color of my eye. Look at the color of the text.</span><br>\n</p>\n<p>\n	Can Drive?: <span class=\"highlight\">(Dependency) </span> Yes: <input type=\"radio\" name=\"can_drive\" value=\"yes\">\n	No: <input type=\"radio\" name=\"can_drive\" value=\"no\">\n	Maybe: <input type=\"radio\" name=\"can_drive\" value=\"maybe\"> <br>\n\n	Drivers licence: <input type=\"checkbox\" name=\"drivers_license\"/> <br>\n	Motorcycle license: <input type=\"checkbox\" name=\"motorcycle_license\" /><br>\n</p>\n<p>\nDog: <span class=\"highlight\">(Custom object value binding)</span>\n	<select name=\"dog\">\n		<option value=\"\">Please Select</option>\n		<option value=\"1\">smith</option>\n		<option value=\"2\">Biff</option>\n		<option value=\"3\">Candy</option>\n	</select>\n</p>\n<p>\n	Big Text: <textarea name=\"bigText\" rows=\"6\" cols=\"40\"></textarea>\n</p>\n";});
 }});
 
 window.require.define({"views/templates/header": function(exports, require, module) {

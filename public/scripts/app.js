@@ -75,7 +75,7 @@
 })();
 
 window.require.define({"application": function(exports, require, module) {
-  var Application, Chaplin, FooterController, FormController, HeaderController, Layout, SessionController, TopCenterController, mediator, routes,
+  var Application, Chaplin, FooterController, FormController, HeaderController, Layout, SessionController, TableController, TopCenterController, mediator, routes,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -94,6 +94,8 @@ window.require.define({"application": function(exports, require, module) {
   TopCenterController = require('controllers/topCenter_controller');
 
   FormController = require('controllers/form_controller');
+
+  TableController = require('controllers/table_controller');
 
   Layout = require('views/layout');
 
@@ -128,7 +130,8 @@ window.require.define({"application": function(exports, require, module) {
       new HeaderController();
       new FooterController();
       new TopCenterController();
-      return new FormController();
+      new FormController();
+      return new TableController();
     };
 
     Application.prototype.initMediator = function() {
@@ -445,6 +448,39 @@ window.require.define({"controllers/session_controller": function(exports, requi
   
 }});
 
+window.require.define({"controllers/table_controller": function(exports, require, module) {
+  var Controller, Table, TableCollectionView, TablesController,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Controller = require('controllers/base/controller');
+
+  Table = require('models/table');
+
+  TableCollectionView = require('views/table_collection_view');
+
+  module.exports = TablesController = (function(_super) {
+
+    __extends(TablesController, _super);
+
+    function TablesController() {
+      return TablesController.__super__.constructor.apply(this, arguments);
+    }
+
+    TablesController.prototype.initialize = function() {
+      TablesController.__super__.initialize.apply(this, arguments);
+      this.model = new Table();
+      return this.view = new TableCollectionView({
+        model: this.model
+      });
+    };
+
+    return TablesController;
+
+  })(Controller);
+  
+}});
+
 window.require.define({"controllers/topCenter_controller": function(exports, require, module) {
   var BottomLeftView, BottomRightView, Controller, Numbers, TopCenterController, TopCenterView, TopLeftView, TopRightView,
     __hasProp = {}.hasOwnProperty,
@@ -508,6 +544,293 @@ window.require.define({"initialize": function(exports, require, module) {
     app = new Application();
     return app.initialize();
   });
+  
+}});
+
+window.require.define({"lib/plugins/backbone.collectionBinder": function(exports, require, module) {
+  // Backbone.CollectionBinder v0.1.1
+  // (c) 2012 Bart Wood
+  // Distributed Under MIT License
+
+  (function(){
+
+      if(!Backbone){
+          throw 'Please include Backbone.js before Backbone.ModelBinder.js';
+      }
+
+      if(!Backbone.ModelBinder){
+          throw 'Please include Backbone.ModelBinder.js before Backbone.CollectionBinder.js';
+      }
+
+      Backbone.CollectionBinder = function(elManagerFactory, options){
+          _.bindAll(this);
+
+          this._elManagerFactory = elManagerFactory;
+          if(!this._elManagerFactory) throw 'elManagerFactory must be defined.';
+
+          // Let the factory just use the trigger function on the view binder
+          this._elManagerFactory.trigger = this.trigger;
+
+          this._options = options || {};
+      };
+
+      Backbone.CollectionBinder.VERSION = '0.1.1';
+
+      _.extend(Backbone.CollectionBinder.prototype, Backbone.Events, {
+          bind: function(collection, parentEl){
+              this.unbind();
+
+              if(!collection) throw 'collection must be defined';
+              if(!parentEl) throw 'parentEl must be defined';
+
+              this._collection = collection;
+              this._elManagerFactory.setParentEl(parentEl);
+
+              this._onCollectionReset();
+
+              this._collection.on('add', this._onCollectionAdd, this);
+              this._collection.on('remove', this._onCollectionRemove, this);
+              this._collection.on('reset', this._onCollectionReset, this);
+
+          },
+
+          unbind: function(){
+              if(this._collection !== undefined){
+                  this._collection.off('add', this._onCollectionAdd);
+                  this._collection.off('remove', this._onCollectionRemove);
+                  this._collection.off('reset', this._onCollectionReset);
+              }
+
+              this._removeAllElManagers();
+          },
+
+          getManagerForEl: function(el){
+              var i, elManager, elManagers = _.values(this._elManagers);
+
+              for(i = 0; i < elManagers.length; i++){
+                  elManager = elManagers[i];
+
+                  if(elManager.isElContained(el)){
+                      return elManager;
+                  }
+              }
+
+              return undefined;
+          },
+
+          getManagerForModel: function(model){
+              var i, elManager, elManagers = _.values(this._elManagers);
+
+              for(i = 0; i < elManagers.length; i++){
+                  elManager = elManagers[i];
+
+                  if(elManager.getModel() === model){
+                      return elManager;
+                  }
+              }
+
+              return undefined;
+          },
+
+          _onCollectionAdd: function(model){
+              this._elManagers[model.cid] = this._elManagerFactory.makeElManager(model);
+              this._elManagers[model.cid].createEl();
+
+              if(this._options['autoSort']){
+                  this.sortRootEls();
+              }
+          },
+
+          _onCollectionRemove: function(model){
+              this._removeElManager(model);
+          },
+
+          _onCollectionReset: function(){
+              this._removeAllElManagers();
+
+              this._collection.each(function(model){
+                  this._onCollectionAdd(model);
+              }, this);
+
+              this.trigger('elsReset', this._collection);
+          },
+
+          _removeAllElManagers: function(){
+              _.each(this._elManagers, function(elManager){
+                  elManager.removeEl();
+                  delete this._elManagers[elManager._model.cid];
+              }, this);
+
+              delete this._elManagers;
+              this._elManagers = {};
+          },
+
+          _removeElManager: function(model){
+              if(this._elManagers[model.cid] !== undefined){
+                  this._elManagers[model.cid].removeEl();
+                  delete this._elManagers[model.cid];
+              }
+          },
+
+          sortRootEls: function(){
+              this._collection.each(function(model, modelIndex){
+                  var modelElManager = this.getManagerForModel(model);
+                  if(modelElManager){
+                      var modelEl = modelElManager.getEl();
+                      var currentRootEls = this._elManagerFactory.getParentEl().children();
+
+                      if(currentRootEls[modelIndex] !== modelEl[0]){
+                          modelEl.detach();
+                          modelEl.insertBefore(currentRootEls[modelIndex]);
+                      }
+                  }
+              }, this);
+          }
+      });
+
+      // The ElManagerFactory is used for els that are just html templates
+      // elHtml - how the model's html will be rendered.  Must have a single root element (div,span).
+      // bindings (optional) - either a string which is the binding attribute (name, id, data-name, etc.) or a normal bindings hash
+      Backbone.CollectionBinder.ElManagerFactory = function(elHtml, bindings){
+          _.bindAll(this);
+
+          this._elHtml = elHtml;
+          this._bindings = bindings;
+
+          if(! _.isString(this._elHtml)) throw 'elHtml must be a valid html string';
+      };
+
+      _.extend(Backbone.CollectionBinder.ElManagerFactory.prototype, {
+          setParentEl: function(parentEl){
+              this._parentEl = parentEl;
+          },
+
+          getParentEl: function(){
+              return this._parentEl;
+          },
+
+          makeElManager: function(model){
+
+              var elManager = {
+                  _model: model,
+
+                  createEl: function(){
+
+                      this._el =  $(this._elHtml);
+                      $(this._parentEl).append(this._el);
+
+                      if(this._bindings){
+                          if(_.isString(this._bindings)){
+                              this._modelBinder = new Backbone.ModelBinder();
+                              this._modelBinder.bind(this._model, this._el, Backbone.ModelBinder.createDefaultBindings(this._el, this._bindings));
+                          }
+                          else if(_.isObject(this._bindings)){
+                              this._modelBinder = new Backbone.ModelBinder();
+                              this._modelBinder.bind(this._model, this._el, this._bindings);
+                          }
+                          else {
+                              throw 'Unsupported bindings type, please use a boolean or a bindings hash';
+                          }
+                      }
+
+                      this.trigger('elCreated', this._model, this._el);
+                  },
+
+                  removeEl: function(){
+                      if(this._modelBinder !== undefined){
+                          this._modelBinder.unbind();
+                      }
+
+                      this._el.remove();
+                      this.trigger('elRemoved', this._model, this._el);
+                  },
+
+                  isElContained: function(findEl){
+                      return this._el === findEl || $(this._el).has(findEl).length > 0;
+                  },
+
+                  getModel: function(){
+                      return this._model;
+                  },
+
+                  getEl: function(){
+                      return this._el;
+                  }
+              };
+
+              _.extend(elManager, this);
+              return elManager;
+          }
+      });
+
+
+      // The ViewManagerFactory is used for els that are created and owned by backbone views.
+      // There is no bindings option because the view made by the viewCreator should take care of any binding
+      // viewCreator - a callback that will create backbone view instances for a model passed to the callback
+      Backbone.CollectionBinder.ViewManagerFactory = function(viewCreator){
+          _.bindAll(this);
+          this._viewCreator = viewCreator;
+
+          if(!_.isFunction(this._viewCreator)) throw 'viewCreator must be a valid function that accepts a model and returns a backbone view';
+      };
+
+      _.extend(Backbone.CollectionBinder.ViewManagerFactory.prototype, {
+          setParentEl: function(parentEl){
+              this._parentEl = parentEl;
+          },
+
+          getParentEl: function(){
+              return this._parentEl;
+          },
+
+          makeElManager: function(model){
+              var elManager = {
+
+                  _model: model,
+
+                  createEl: function(){
+                      this._view = this._viewCreator(model);
+                      $(this._parentEl).append(this._view.render(this._model).el);
+
+                      this.trigger('elCreated', this._model, this._view);
+                  },
+
+                  removeEl: function(){
+                      if(this._view.close !== undefined){
+                          this._view.close();
+                      }
+                      else {
+                          this._view.$el.remove();
+                          console.log('warning, you should implement a close() function for your view, you might end up with zombies');
+                      }
+
+                      this.trigger('elRemoved', this._model, this._view);
+                  },
+
+                  isElContained: function(findEl){
+                      return this._view.el === findEl || this._view.$el.has(findEl).length > 0;
+                  },
+
+                  getModel: function(){
+                      return this._model;
+                  },
+
+                  getView: function(){
+                      return this._view;
+                  },
+
+                  getEl: function(){
+                      return this._view.el;
+                  }
+              };
+
+              _.extend(elManager, this);
+
+              return elManager;
+          }
+      });
+
+  }).call(this);
   
 }});
 
@@ -2012,6 +2335,60 @@ window.require.define({"models/numbers": function(exports, require, module) {
   
 }});
 
+window.require.define({"models/table": function(exports, require, module) {
+  var Model, Table,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('models/base/model');
+
+  module.exports = Table = (function(_super) {
+
+    __extends(Table, _super);
+
+    function Table() {
+      return Table.__super__.constructor.apply(this, arguments);
+    }
+
+    Table.prototype.defaults = {
+      _id: null,
+      first: null,
+      last: null,
+      telephone: null,
+      price: null
+    };
+
+    return Table;
+
+  })(Model);
+  
+}});
+
+window.require.define({"models/tables": function(exports, require, module) {
+  var Collection, Table, Tables,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Collection = require('models/base/collection');
+
+  Table = require('models/table');
+
+  module.exports = Tables = (function(_super) {
+
+    __extends(Tables, _super);
+
+    function Tables() {
+      return Tables.__super__.constructor.apply(this, arguments);
+    }
+
+    Tables.prototype.model = Table;
+
+    return Tables;
+
+  })(Collection);
+  
+}});
+
 window.require.define({"models/user": function(exports, require, module) {
   var Model, User,
     __hasProp = {}.hasOwnProperty,
@@ -2063,6 +2440,8 @@ window.require.define({"views/base/collection_view": function(exports, require, 
   Chaplin = require('chaplin');
 
   View = require('views/base/view');
+
+  require('lib/plugins/backbone.collectionBinder');
 
   module.exports = CollectionView = (function(_super) {
 
@@ -2633,6 +3012,136 @@ window.require.define({"views/login_view": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/table_collection_view": function(exports, require, module) {
+  var TableCollectionView, TableView, Tables, View,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  TableView = require('views/table_view');
+
+  Tables = require('models/tables');
+
+  require('lib/plugins/backbone.collectionBinder');
+
+  module.exports = TableCollectionView = (function(_super) {
+
+    __extends(TableCollectionView, _super);
+
+    function TableCollectionView() {
+      return TableCollectionView.__super__.constructor.apply(this, arguments);
+    }
+
+    TableCollectionView.prototype.initialize = function() {
+      var collection, collectionBinder, elManagerFactory, modelCreateCount, viewCreator;
+      collection = new Tables([
+        {
+          _id: 0,
+          first: 'Adam',
+          last: 'Zebra'
+        }, {
+          _id: 1,
+          first: 'Bob',
+          telephone: '1234567'
+        }
+      ]);
+      _.bindAll('createModel', this);
+      viewCreator = function(model) {
+        return new TableView({
+          model: model
+        });
+      };
+      elManagerFactory = new Backbone.CollectionBinder.ViewManagerFactory(viewCreator);
+      collectionBinder = new Backbone.CollectionBinder(elManagerFactory);
+      collectionBinder.bind(collection, $('tbody'));
+      collectionBinder.on('elCreated', function(model, view) {
+        var elManager;
+        console.log(model);
+        console.log(view);
+        elManager = collectionBinder.getManagerForEl(view.el);
+        console.log(elManager);
+        return console.log(elManager.getModel());
+      });
+      collectionBinder.on('elRemoved', function(model, view) {
+        console.log(model);
+        return console.log(view);
+      });
+      modelCreateCount = 2;
+      $("#createModel").on('click', function(e) {
+        var obj;
+        obj = {
+          _id: modelCreateCount,
+          first: $('#createFirst').val(),
+          last: $('#createLast').val(),
+          telephone: $('#createTelephone').val(),
+          price: $('#createPrice').val()
+        };
+        collection.add(obj);
+        modelCreateCount++;
+        $('#createFirst').val('');
+        $('#createLast').val('');
+        $('#createTelephone').val('');
+        return $('#createPrice').val('');
+      });
+      $('body').delegate('.remove', 'click', function(e) {
+        var modelNum;
+        modelNum = ($(e.target)).closest('tr').find('.order').text();
+        return collection.remove(collection.at(modelNum));
+      });
+      return ($("#removeAllModel")).on('click', function(e) {
+        collection.reset();
+        return modelCreateCount = 0;
+      });
+    };
+
+    return TableCollectionView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/table_view": function(exports, require, module) {
+  var TableCollectionView, Tables, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/table');
+
+  Tables = require('models/tables');
+
+  module.exports = TableCollectionView = (function(_super) {
+
+    __extends(TableCollectionView, _super);
+
+    function TableCollectionView() {
+      return TableCollectionView.__super__.constructor.apply(this, arguments);
+    }
+
+    TableCollectionView.prototype.template = template;
+
+    TableCollectionView.prototype.tagName = 'tr';
+
+    TableCollectionView.prototype.autoRender = false;
+
+    TableCollectionView.prototype.initialize = function() {
+      return this._modelBinder = new Backbone.ModelBinder();
+    };
+
+    TableCollectionView.prototype.render = function() {
+      this.$el.html(template);
+      this._modelBinder.bind(this.model, this.el, Backbone.ModelBinder.createDefaultBindings(this.el, 'data-name'));
+      return this;
+    };
+
+    return TableCollectionView;
+
+  })(View);
+  
+}});
+
 window.require.define({"views/templates/bottom_left": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -2876,6 +3385,15 @@ window.require.define({"views/templates/login": function(exports, require, modul
 
 
     return buffer;});
+}});
+
+window.require.define({"views/templates/table": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<td data-name=\"select_box\"><input type=\"checkbox\" name=\"select\"></td>\n<td data-name=\"_id\" class='order'></td>\n<td data-name=\"first\"></td>\n<td data-name=\"last\"></td>\n<td data-name=\"telephone\"></td>\n<td data-name=\"price\"></td>\n<td data-name=\"remove_box\"><input type=\"checkbox\" class=\"remove\"></td>\n";});
 }});
 
 window.require.define({"views/templates/topCenter": function(exports, require, module) {

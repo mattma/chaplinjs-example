@@ -87,19 +87,6 @@ window.require.define({"test/controllers/footer_controller_test": function(expor
   
 }});
 
-window.require.define({"test/controllers/form_alt_controller_test": function(exports, require, module) {
-  var FormAlt;
-
-  FormAlt = require('models/form_alt');
-
-  describe('FormAlt', function() {
-    return beforeEach(function() {
-      return this.model = new FormAlt();
-    });
-  });
-  
-}});
-
 window.require.define({"test/controllers/form_controller_test": function(exports, require, module) {
   var Form;
 
@@ -108,6 +95,19 @@ window.require.define({"test/controllers/form_controller_test": function(exports
   describe('Form', function() {
     return beforeEach(function() {
       return this.model = new Form();
+    });
+  });
+  
+}});
+
+window.require.define({"test/controllers/table_controller_test": function(exports, require, module) {
+  var Table;
+
+  Table = require('models/table');
+
+  describe('Table', function() {
+    return beforeEach(function() {
+      return this.model = new Table();
     });
   });
   
@@ -165,19 +165,6 @@ window.require.define({"test/models/form": function(exports, require, module) {
   
 }});
 
-window.require.define({"test/models/form_alt": function(exports, require, module) {
-  var FormAlt;
-
-  FormAlt = require('models/form_alt');
-
-  describe('FormAlt', function() {
-    return beforeEach(function() {
-      return this.model = new FormAlt();
-    });
-  });
-  
-}});
-
 window.require.define({"test/models/header_test": function(exports, require, module) {
   var Header;
 
@@ -207,6 +194,25 @@ window.require.define({"test/models/numbers": function(exports, require, module)
       return this.model = new Numbers();
     });
   });
+  
+}});
+
+window.require.define({"test/models/table": function(exports, require, module) {
+  var Table;
+
+  Table = require('models/table');
+
+  describe('Table', function() {
+    return beforeEach(function() {
+      return this.model = new Table();
+    });
+  });
+  
+}});
+
+window.require.define({"test/models/tables_test": function(exports, require, module) {
+  
+
   
 }});
 
@@ -247,19 +253,6 @@ window.require.define({"test/views/footer_view": function(exports, require, modu
   describe('FooterView', function() {
     return beforeEach(function() {
       return this.view = new FooterView();
-    });
-  });
-  
-}});
-
-window.require.define({"test/views/form_alt_view": function(exports, require, module) {
-  var FormAltView;
-
-  FormAltView = require('views/form_alt_view');
-
-  describe('FormAltView', function() {
-    return beforeEach(function() {
-      return this.view = new FormAltView();
     });
   });
   
@@ -350,6 +343,19 @@ window.require.define({"test/views/home_page_view_test": function(exports, requi
   
 }});
 
+window.require.define({"test/views/table_view": function(exports, require, module) {
+  var TableView;
+
+  TableView = require('views/table_view');
+
+  describe('TableView', function() {
+    return beforeEach(function() {
+      return this.view = new TableView();
+    });
+  });
+  
+}});
+
 window.require.define({"test/views/topCenter_view": function(exports, require, module) {
   var TopCenterView;
 
@@ -377,10 +383,11 @@ window.require.define({"test/views/top_left_view": function(exports, require, mo
 }});
 
 window.require('test/controllers/footer_controller_test');
-window.require('test/controllers/form_alt_controller_test');
 window.require('test/controllers/form_controller_test');
+window.require('test/controllers/table_controller_test');
 window.require('test/controllers/topCenter_controller_test');
 window.require('test/controllers/top_left_controller_test');
 window.require('test/models/header_test');
+window.require('test/models/tables_test');
 window.require('test/views/header_view_test');
 window.require('test/views/home_page_view_test');

@@ -17,3 +17,35 @@ block content
 			h2 Model Data Binding:
 		#form
 			h2 Form Data Custom Binding:
+		#table
+			h2 Table Data Custom Binding:
+			#addModel
+				p
+					| First Name:
+					input(type='text', id='createFirst')
+				p
+					| Last Name:
+					input(type='text', id='createLast')
+				p
+					| Telephone:
+					input(type='text', id='createTelephone')
+				p
+					| Price:
+					input(type='text', id='createPrice')
+				p
+					input(type="button", id="createModel", value="Create New Model")
+
+
+			table
+				thead
+					tr
+						th select
+						th ID
+						th First Name
+						th Last Name
+						th Phone
+						th Price
+						th
+							| delete
+							input(type="button", id="removeAllModel", value="all")
+				tbody

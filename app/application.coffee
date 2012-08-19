@@ -6,6 +6,7 @@ HeaderController = require 'controllers/header_controller'
 FooterController = require 'controllers/footer_controller'
 TopCenterController = require 'controllers/topCenter_controller'
 FormController = require 'controllers/form_controller'
+TableController = require 'controllers/table_controller'
 Layout = require 'views/layout'
 
 # The application object
@@ -57,6 +58,7 @@ module.exports = class Application extends Chaplin.Application
 		new FooterController()
 		new TopCenterController()
 		new FormController()
+		new TableController()
 
 	# Create additional mediator properties
 	# -------------------------------------

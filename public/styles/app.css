@@ -168,6 +168,28 @@ td { vertical-align: top; }
 
 .highlight {
   color: maroon; }
+
+table {
+  width: 600px;
+  background-color: #fbfbfb;
+  border-collapse: collapse;
+  border-spacing: 0; }
+  table th, table td {
+    padding: 8px;
+    line-height: 1.4em;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid #e7e7e7; }
+  table th {
+    font-weight: bold; }
+  table thead th {
+    vertical-align: bottom; }
+  table thead:first-child tr:first-child th,
+  table thead:first-child tr:first-child td {
+    border-top: 0; }
+
+#table {
+  margin-bottom: 80px; }
 .home-page {
   width: 476px;
   height: 130px;

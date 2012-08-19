@@ -1,17 +1,19 @@
 View = require 'views/base/view'
 TableView = require 'views/table_view'
 Tables = require 'models/tables'
+TablePriceView = require 'views/table_price_view'
 require 'lib/plugins/backbone.collectionBinder'
 
 module.exports = class TableCollectionView extends View
 
 	initialize: ->
+
 		collection = new Tables [
-			{ _id: 0, first: 'Adam', last: 'Zebra'}
+			{ _id: 0, first: 'Adam', last: 'Zebra', price: "23"}
 			{ _id: 1, first: 'Bob', telephone: '1234567'}
 		]
 
-		_.bindAll 'createModel',@
+		_.bindAll 'createModel', @
 
 		viewCreator = (model) -> return new TableView {model: model}
 
@@ -28,6 +30,7 @@ module.exports = class TableCollectionView extends View
 			console.log view
 
 			elManager = collectionBinder.getManagerForEl view.el
+			#new TablePriceView {model}
 
 			console.log elManager
 			console.log elManager.getModel()
@@ -63,3 +66,14 @@ module.exports = class TableCollectionView extends View
 		($ "#removeAllModel").on 'click', (e) ->
 			collection.reset()
 			modelCreateCount = 0
+
+		$('body').delegate '.select', 'click', (e) ->
+
+			modelNum = ($ e.target).closest('tr').find('.order').text()
+			model = collection.at(modelNum)
+
+			if ($ this).attr("checked") is "checked"
+				new TablePriceView {model}
+			else
+				mid = parseInt(modelNum)
+				$(".model_#{mid}").closest("li").remove()

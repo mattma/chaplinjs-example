@@ -2355,7 +2355,7 @@ window.require.define({"models/table": function(exports, require, module) {
       first: null,
       last: null,
       telephone: null,
-      price: null
+      price: 10
     };
 
     return Table;
@@ -3013,7 +3013,7 @@ window.require.define({"views/login_view": function(exports, require, module) {
 }});
 
 window.require.define({"views/table_collection_view": function(exports, require, module) {
-  var TableCollectionView, TableView, Tables, View,
+  var TableCollectionView, TablePriceView, TableView, Tables, View,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3022,6 +3022,8 @@ window.require.define({"views/table_collection_view": function(exports, require,
   TableView = require('views/table_view');
 
   Tables = require('models/tables');
+
+  TablePriceView = require('views/table_price_view');
 
   require('lib/plugins/backbone.collectionBinder');
 
@@ -3039,7 +3041,8 @@ window.require.define({"views/table_collection_view": function(exports, require,
         {
           _id: 0,
           first: 'Adam',
-          last: 'Zebra'
+          last: 'Zebra',
+          price: "23"
         }, {
           _id: 1,
           first: 'Bob',
@@ -3089,13 +3092,57 @@ window.require.define({"views/table_collection_view": function(exports, require,
         modelNum = ($(e.target)).closest('tr').find('.order').text();
         return collection.remove(collection.at(modelNum));
       });
-      return ($("#removeAllModel")).on('click', function(e) {
+      ($("#removeAllModel")).on('click', function(e) {
         collection.reset();
         return modelCreateCount = 0;
+      });
+      return $('body').delegate('.select', 'click', function(e) {
+        var mid, model, modelNum;
+        modelNum = ($(e.target)).closest('tr').find('.order').text();
+        model = collection.at(modelNum);
+        if (($(this)).attr("checked") === "checked") {
+          return new TablePriceView({
+            model: model
+          });
+        } else {
+          mid = parseInt(modelNum);
+          return $(".model_" + mid).closest("li").remove();
+        }
       });
     };
 
     return TableCollectionView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/table_price_view": function(exports, require, module) {
+  var TablePriceView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/table_price');
+
+  module.exports = TablePriceView = (function(_super) {
+
+    __extends(TablePriceView, _super);
+
+    function TablePriceView() {
+      return TablePriceView.__super__.constructor.apply(this, arguments);
+    }
+
+    TablePriceView.prototype.template = template;
+
+    TablePriceView.prototype.tagName = 'li';
+
+    TablePriceView.prototype.container = '#priceUpdate';
+
+    TablePriceView.prototype.autoRender = true;
+
+    return TablePriceView;
 
   })(View);
   
@@ -3393,7 +3440,32 @@ window.require.define({"views/templates/table": function(exports, require, modul
     var foundHelper, self=this;
 
 
-    return "<td data-name=\"select_box\"><input type=\"checkbox\" name=\"select\"></td>\n<td data-name=\"_id\" class='order'></td>\n<td data-name=\"first\"></td>\n<td data-name=\"last\"></td>\n<td data-name=\"telephone\"></td>\n<td data-name=\"price\"></td>\n<td data-name=\"remove_box\"><input type=\"checkbox\" class=\"remove\"></td>\n";});
+    return "<td data-name=\"select_box\"><input type=\"checkbox\" class=\"select\"></td>\n<td data-name=\"_id\" class='order'></td>\n<td data-name=\"first\"></td>\n<td data-name=\"last\"></td>\n<td data-name=\"telephone\"></td>\n<td data-name=\"price\"></td>\n<td data-name=\"remove_box\"><input type=\"checkbox\" class=\"remove\"></td>\n";});
+}});
+
+window.require.define({"views/templates/table_price": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div class=\"model_";
+    foundHelper = helpers._id;
+    stack1 = foundHelper || depth0._id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "_id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n	<span class=\"first\">";
+    foundHelper = helpers.first;
+    stack1 = foundHelper || depth0.first;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "first", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</span>\n	<span class=\"price\">";
+    foundHelper = helpers.price;
+    stack1 = foundHelper || depth0.price;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "price", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</span>\n</div>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/topCenter": function(exports, require, module) {

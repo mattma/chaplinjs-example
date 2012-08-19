@@ -6,4 +6,4 @@ module.exports = class Table extends Model
 		first: null
 		last: null
 		telephone: null
-		price: null
+		price: 10

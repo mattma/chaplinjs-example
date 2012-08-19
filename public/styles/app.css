@@ -189,7 +189,22 @@ table {
     border-top: 0; }
 
 #table {
-  margin-bottom: 80px; }
+  margin-bottom: 80px;
+  position: relative; }
+  #table article {
+    position: absolute;
+    top: 20px;
+    right: 0;
+    width: 320px;
+    height: auto; }
+    #table article li {
+      width: 100%;
+      height: 26px; }
+      #table article li span {
+        width: 50%;
+        height: auto;
+        display: block;
+        float: left; }
 .home-page {
   width: 476px;
   height: 130px;

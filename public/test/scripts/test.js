@@ -343,6 +343,19 @@ window.require.define({"test/views/home_page_view_test": function(exports, requi
   
 }});
 
+window.require.define({"test/views/table_price_view": function(exports, require, module) {
+  var TablePriceView;
+
+  TablePriceView = require('views/table_price_view');
+
+  describe('TablePriceView', function() {
+    return beforeEach(function() {
+      return this.view = new TablePriceView();
+    });
+  });
+  
+}});
+
 window.require.define({"test/views/table_view": function(exports, require, module) {
   var TableView;
 

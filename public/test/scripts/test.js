@@ -87,6 +87,19 @@ window.require.define({"test/controllers/footer_controller_test": function(expor
   
 }});
 
+window.require.define({"test/controllers/form_alt_controller_test": function(exports, require, module) {
+  var FormAlt;
+
+  FormAlt = require('models/form_alt');
+
+  describe('FormAlt', function() {
+    return beforeEach(function() {
+      return this.model = new FormAlt();
+    });
+  });
+  
+}});
+
 window.require.define({"test/controllers/form_controller_test": function(exports, require, module) {
   var Form;
 
@@ -95,19 +108,6 @@ window.require.define({"test/controllers/form_controller_test": function(exports
   describe('Form', function() {
     return beforeEach(function() {
       return this.model = new Form();
-    });
-  });
-  
-}});
-
-window.require.define({"test/controllers/matttest_controller_test": function(exports, require, module) {
-  var Matttest;
-
-  Matttest = require('models/matttest');
-
-  describe('Matttest', function() {
-    return beforeEach(function() {
-      return this.model = new Matttest();
     });
   });
   
@@ -160,6 +160,19 @@ window.require.define({"test/models/form": function(exports, require, module) {
   describe('Form', function() {
     return beforeEach(function() {
       return this.model = new Form();
+    });
+  });
+  
+}});
+
+window.require.define({"test/models/form_alt": function(exports, require, module) {
+  var FormAlt;
+
+  FormAlt = require('models/form_alt');
+
+  describe('FormAlt', function() {
+    return beforeEach(function() {
+      return this.model = new FormAlt();
     });
   });
   
@@ -234,6 +247,19 @@ window.require.define({"test/views/footer_view": function(exports, require, modu
   describe('FooterView', function() {
     return beforeEach(function() {
       return this.view = new FooterView();
+    });
+  });
+  
+}});
+
+window.require.define({"test/views/form_alt_view": function(exports, require, module) {
+  var FormAltView;
+
+  FormAltView = require('views/form_alt_view');
+
+  describe('FormAltView', function() {
+    return beforeEach(function() {
+      return this.view = new FormAltView();
     });
   });
   
@@ -351,8 +377,8 @@ window.require.define({"test/views/top_left_view": function(exports, require, mo
 }});
 
 window.require('test/controllers/footer_controller_test');
+window.require('test/controllers/form_alt_controller_test');
 window.require('test/controllers/form_controller_test');
-window.require('test/controllers/matttest_controller_test');
 window.require('test/controllers/topCenter_controller_test');
 window.require('test/controllers/top_left_controller_test');
 window.require('test/models/header_test');

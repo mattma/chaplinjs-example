@@ -19,9 +19,25 @@ module.exports = class FormView extends View
 		bindings =
 			first_name: '[name=first_name]'  #Only binding with the name attribute in the markup
 			#height: '[name=height]'
+			drivers_license: '[name=drivers_license]'
 			motorcycle_license:'[name=motorcycle_license]'
-			graduated:'[name=graduated]'
-			eyeColor:'[name=eyeColor]'
+			#graduated:'[name=graduated]'
+			can_drive:[
+				{selector: '[name=can_drive]'}
+				{
+					selector: '[name=drivers_license],[name=motorcycle_license]'
+					elAttribute: 'enabled'
+					converter: @canDriveTest
+				}
+			]
+			text_color:[
+				{selector: '[name=text_color]'}
+				{
+					selector: "span.label"
+					elAttribute: "class"
+					converter: @assignColorClass
+				}
+			]
 			phone:{selector:'[name=phone]', converter: @phoneConverter}
 			dog:{selector:'[name=dog]', converter:(new Backbone.ModelBinder.CollectionConverter(dogs)).convert}
 			bigText:'[name=bigText]'
@@ -33,6 +49,12 @@ module.exports = class FormView extends View
 
 	logChange: ->
 		@$el.find("#viewContent").html "Form Data:<br><p>" +  JSON.stringify(@model.toJSON()) + "</p>"
+
+	assignColorClass: (direction, value)->
+		return value
+
+	canDriveTest: (direction, value) ->
+		return value is 'yes'
 
 	# Convert the data from Model, to a new formatted value
 	phoneConverter: (direction, value)->

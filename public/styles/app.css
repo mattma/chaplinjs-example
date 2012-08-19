@@ -150,7 +150,21 @@ td { vertical-align: top; }
       width: 400px;
       line-height: 1.4em;
       color: red;
-      font-size: 1.2em; }
+      font-size: 1.4em; }
+  #form input[type="radio"] {
+    width: 20px;
+    height: 20px; }
+  #form input[type="checkbox"] {
+    width: 28px;
+    height: 28px; }
+    #form input[type="checkbox"]:disabled {
+      opacity: 0.6; }
+  #form .label.green {
+    color: green; }
+  #form .label.brown {
+    color: brown; }
+  #form .label.blue {
+    color: blue; }
 
 .highlight {
   color: maroon; }

@@ -87,6 +87,19 @@ window.require.define({"test/controllers/footer_controller_test": function(expor
   
 }});
 
+window.require.define({"test/controllers/form_controller_test": function(exports, require, module) {
+  var Form;
+
+  Form = require('models/form');
+
+  describe('Form', function() {
+    return beforeEach(function() {
+      return this.model = new Form();
+    });
+  });
+  
+}});
+
 window.require.define({"test/controllers/topCenter_controller_test": function(exports, require, module) {
   var TopCenter;
 
@@ -121,6 +134,19 @@ window.require.define({"test/models/footer": function(exports, require, module) 
   describe('Footer', function() {
     return beforeEach(function() {
       return this.model = new Footer();
+    });
+  });
+  
+}});
+
+window.require.define({"test/models/form": function(exports, require, module) {
+  var Form;
+
+  Form = require('models/form');
+
+  describe('Form', function() {
+    return beforeEach(function() {
+      return this.model = new Form();
     });
   });
   
@@ -174,6 +200,19 @@ window.require.define({"test/test-helpers": function(exports, require, module) {
   
 }});
 
+window.require.define({"test/views/footer_sub_view": function(exports, require, module) {
+  var FooterSubView;
+
+  FooterSubView = require('views/footer_sub_view');
+
+  describe('FooterSubView', function() {
+    return beforeEach(function() {
+      return this.view = new FooterSubView();
+    });
+  });
+  
+}});
+
 window.require.define({"test/views/footer_view": function(exports, require, module) {
   var FooterView;
 
@@ -182,6 +221,19 @@ window.require.define({"test/views/footer_view": function(exports, require, modu
   describe('FooterView', function() {
     return beforeEach(function() {
       return this.view = new FooterView();
+    });
+  });
+  
+}});
+
+window.require.define({"test/views/form_view": function(exports, require, module) {
+  var FormView;
+
+  FormView = require('views/form_view');
+
+  describe('FormView', function() {
+    return beforeEach(function() {
+      return this.view = new FormView();
     });
   });
   
@@ -286,6 +338,7 @@ window.require.define({"test/views/top_left_view": function(exports, require, mo
 }});
 
 window.require('test/controllers/footer_controller_test');
+window.require('test/controllers/form_controller_test');
 window.require('test/controllers/topCenter_controller_test');
 window.require('test/controllers/top_left_controller_test');
 window.require('test/models/header_test');

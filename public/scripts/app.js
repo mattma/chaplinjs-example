@@ -75,7 +75,7 @@
 })();
 
 window.require.define({"application": function(exports, require, module) {
-  var Application, Chaplin, FooterController, HeaderController, Layout, SessionController, TopCenterController, mediator, routes,
+  var Application, Chaplin, FooterController, FormController, HeaderController, Layout, SessionController, TopCenterController, mediator, routes,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -92,6 +92,8 @@ window.require.define({"application": function(exports, require, module) {
   FooterController = require('controllers/footer_controller');
 
   TopCenterController = require('controllers/topCenter_controller');
+
+  FormController = require('controllers/form_controller');
 
   Layout = require('views/layout');
 
@@ -125,7 +127,8 @@ window.require.define({"application": function(exports, require, module) {
       new SessionController();
       new HeaderController();
       new FooterController();
-      return new TopCenterController();
+      new TopCenterController();
+      return new FormController();
     };
 
     Application.prototype.initMediator = function() {
@@ -161,7 +164,7 @@ window.require.define({"controllers/base/controller": function(exports, require,
 }});
 
 window.require.define({"controllers/footer_controller": function(exports, require, module) {
-  var Controller, Footer, FooterController, FooterView,
+  var Controller, Footer, FooterController, FooterSubView, FooterView,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -170,6 +173,8 @@ window.require.define({"controllers/footer_controller": function(exports, requir
   Footer = require('models/footer');
 
   FooterView = require('views/footer_view');
+
+  FooterSubView = require('views/footer_sub_view');
 
   module.exports = FooterController = (function(_super) {
 
@@ -188,6 +193,38 @@ window.require.define({"controllers/footer_controller": function(exports, requir
     };
 
     return FooterController;
+
+  })(Controller);
+  
+}});
+
+window.require.define({"controllers/form_controller": function(exports, require, module) {
+  var Controller, Form, FormController, FormView,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Controller = require('controllers/base/controller');
+
+  Form = require('models/form');
+
+  FormView = require('views/form_view');
+
+  module.exports = FormController = (function(_super) {
+
+    __extends(FormController, _super);
+
+    function FormController() {
+      return FormController.__super__.constructor.apply(this, arguments);
+    }
+
+    FormController.prototype.initialize = function() {
+      this.model = new Form();
+      return this.view = new FormView({
+        model: this.model
+      });
+    };
+
+    return FormController;
 
   })(Controller);
   
@@ -1850,24 +1887,46 @@ window.require.define({"models/footer": function(exports, require, module) {
     }
 
     Footer.prototype.defaults = {
-      links: [
-        {
-          href: "http://mattmadesign.com",
-          name: "mattma"
-        }, {
-          href: "http://yahoo.com",
-          name: "kelly"
-        }, {
-          href: "http://google.com",
-          name: "aaron"
-        }
-      ],
       firstName: "matt",
       lastName: "ma",
-      age: 30
+      age: 18
     };
 
     return Footer;
+
+  })(Model);
+  
+}});
+
+window.require.define({"models/form": function(exports, require, module) {
+  var Form, Model,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('models/base/model');
+
+  module.exports = Form = (function(_super) {
+
+    __extends(Form, _super);
+
+    function Form() {
+      return Form.__super__.constructor.apply(this, arguments);
+    }
+
+    Form.prototype.defaults = {
+      firstName: null,
+      lastName: null,
+      phone: null,
+      height: null,
+      graduated: null,
+      eyeColor: null,
+      driversLicense: null,
+      motorcycle_license: null,
+      dog: null,
+      bigText: null
+    };
+
+    return Form;
 
   })(Model);
   
@@ -2190,6 +2249,48 @@ window.require.define({"views/bottom_right_view": function(exports, require, mod
   
 }});
 
+window.require.define({"views/footer_sub_view": function(exports, require, module) {
+  var FooterSubView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/footer_sub');
+
+  module.exports = FooterSubView = (function(_super) {
+
+    __extends(FooterSubView, _super);
+
+    function FooterSubView() {
+      return FooterSubView.__super__.constructor.apply(this, arguments);
+    }
+
+    FooterSubView.prototype.template = template;
+
+    FooterSubView.prototype.autoRender = true;
+
+    FooterSubView.prototype.container = "#footer_details";
+
+    FooterSubView.prototype.tagName = "div";
+
+    FooterSubView.prototype.initialize = function() {
+      console.log(this.model);
+      return this._modelBinder = new Backbone.ModelBinder();
+    };
+
+    FooterSubView.prototype.render = function() {
+      this.$el.html(template);
+      this._modelBinder.bind(this.model, this.el);
+      return this;
+    };
+
+    return FooterSubView;
+
+  })(View);
+  
+}});
+
 window.require.define({"views/footer_view": function(exports, require, module) {
   var FooterView, View, template,
     __hasProp = {}.hasOwnProperty,
@@ -2213,18 +2314,56 @@ window.require.define({"views/footer_view": function(exports, require, module) {
 
     FooterView.prototype.container = "#footer";
 
+    FooterView.prototype.tagName = "section";
+
+    FooterView.prototype.id = "footer_details";
+
     FooterView.prototype.initialize = function() {
-      return this._modelBinder = new Backbone.ModelBinder();
+      this._modelBinder = new Backbone.ModelBinder();
+      return this.model.on("change", this.consoleModel, this);
     };
 
     FooterView.prototype.render = function() {
       this.$el.html(template);
-      console.log(this.model.toJSON());
+      this.$el.find("article").html("Model Data:<br>" + JSON.stringify(this.model.toJSON()));
       this._modelBinder.bind(this.model, this.el);
       return this;
     };
 
+    FooterView.prototype.consoleModel = function() {
+      return this.$el.find("article").html("Model Data:<br>" + JSON.stringify(this.model.toJSON()));
+    };
+
     return FooterView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/form_view": function(exports, require, module) {
+  var FormView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('views/base/view');
+
+  template = require('views/templates/form');
+
+  module.exports = FormView = (function(_super) {
+
+    __extends(FormView, _super);
+
+    function FormView() {
+      return FormView.__super__.constructor.apply(this, arguments);
+    }
+
+    FormView.prototype.template = template;
+
+    FormView.prototype.container = "#form";
+
+    FormView.prototype.autoRender = true;
+
+    return FormView;
 
   })(View);
   
@@ -2536,49 +2675,110 @@ window.require.define({"views/templates/bottom_right": function(exports, require
 window.require.define({"views/templates/footer": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n	<a href=\"";
-    foundHelper = helpers.href;
-    stack1 = foundHelper || depth0.href;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "href", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a>\n";
-    return buffer;}
 
-    foundHelper = helpers.links;
-    stack1 = foundHelper || depth0.links;
-    stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n<div> Welcome,\n	<span name=\"firstName\">";
+    buffer += "<div>\n	<p> First Name: <span name=\"firstName\">";
     foundHelper = helpers.firstName;
     stack1 = foundHelper || depth0.firstName;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "firstName", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</span>\n	<span name=\"lastName\">";
+    buffer += escapeExpression(stack1) + "</span> </p>\n	<p> Last Name:<span name=\"lastName\">";
     foundHelper = helpers.lastName;
     stack1 = foundHelper || depth0.lastName;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "lastName", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</span>\n	<span name=\"age\">";
+    buffer += escapeExpression(stack1) + "</span>  </p>\n	<p> Age: <span name=\"age\">";
     foundHelper = helpers.age;
     stack1 = foundHelper || depth0.age;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "age", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</span>\n</div>\n<input type=\"text\" name=\"firstName\">\n<input type=\"text\" name=\"lastName\">\n<input type=\"text\" name=\"age\">\n<br><br><br>\n\nEdit your information:<br><br>\nFirst Name: <input type=\"text\" name=\"firstName\"/><br>\nLast Name: <input type=\"text\" name=\"lastName\"/><br>\nPhone: <input type=\"text\" name=\"phone\"/><br>\nHeight: <input type=\"text\" name=\"height\"/><br><br>\n\nGraduated:  Yes: <input type=\"radio\" id=\"graduated_yes\" name=\"graduated\" value=\"yes\">\nNo: <input type=\"radio\" id=\"graduated_no\" name=\"graduated\" value=\"no\">\nMaybe: <input type=\"radio\" id=\"graduated_maybe\" name=\"graduated\" value=\"maybe\"><br>\n\nEye Color:  Green: <input type=\"radio\" name=\"eyeColor\" value=\"green\">\nBlue: <input type=\"radio\" name=\"eyeColor\" value=\"blue\">\nBrown: <input type=\"radio\" name=\"eyeColor\" value=\"brown\"><br><br>\n\nDrivers licence: <input type=\"checkbox\" name=\"driversLicense\"/><br>\nMotorcycle license: <input type=\"checkbox\" name=\"motorcycle_license\" /><br><br>\nDog:\n<select name=\"dog\">\n<option value=\"\">Please Select</option>\n<option value=\"1\">Andy</option>\n<option value=\"2\">Biff</option>\n<option value=\"3\">Candy</option>\n</select> <br><br>\nBig Text:<br> <textarea name=\"bigText\" rows=\"4\" cols=\"80\"></textarea>\n";
+    buffer += escapeExpression(stack1) + "</span> </p>\n</div>\n<p>\n	<label for=\"firstName\">First Name: </label>\n	<input type=\"text\" name=\"firstName\">\n</p>\n<p>\n	<label for=\"lastName\">Last Name: </label>\n	<input type=\"text\" name=\"lastName\">\n</p>\n<p>\n	<label for=\"age\">Age: </label>\n	<input type=\"text\" name=\"age\">\n</p>\n<article></article>\n\n\n\n\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/footer_sub": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "Welcome, my name is ";
+    foundHelper = helpers.firstName;
+    stack1 = foundHelper || depth0.firstName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "firstName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ", ";
+    foundHelper = helpers.lastName;
+    stack1 = foundHelper || depth0.lastName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "lastName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ".\nI am ";
+    foundHelper = helpers.age;
+    stack1 = foundHelper || depth0.age;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "age", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " years old.\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/form": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "First Name: ";
+    foundHelper = helpers.firstName;
+    stack1 = foundHelper || depth0.firstName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "firstName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.lastName;
+    stack1 = foundHelper || depth0.lastName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "lastName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.phone;
+    stack1 = foundHelper || depth0.phone;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "phone", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.height;
+    stack1 = foundHelper || depth0.height;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "height", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.graduated;
+    stack1 = foundHelper || depth0.graduated;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "graduated", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.eyeColor;
+    stack1 = foundHelper || depth0.eyeColor;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "eyeColor", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.driversLicense;
+    stack1 = foundHelper || depth0.driversLicense;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "driversLicense", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.motorcycle_license;
+    stack1 = foundHelper || depth0.motorcycle_license;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "motorcycle_license", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.dog;
+    stack1 = foundHelper || depth0.dog;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "dog", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    foundHelper = helpers.bigText;
+    stack1 = foundHelper || depth0.bigText;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "bigText", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
     return buffer;});
 }});
 

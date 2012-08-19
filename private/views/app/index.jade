@@ -14,5 +14,49 @@ block content
 				.bottom-left-panel
 				.bottom-right-panel
 		#footer
-block scripts
-	//-script(src="/scripts/init.js")
+			h2 Model Data Binding
+		#form
+			h2 Form Data Binding:
+			p
+				| First Name:
+				input(type='text', name='firstName')
+			p
+				| Last Name:
+				input(type='text', name='lastName')
+			p
+				| Phone:
+				input(type='text', name='phone')
+			p
+				| Height:
+				input(type='text', name='height')
+			p
+				| Graduated:  Yes:
+				input#graduated_yes(type='radio', name='graduated', value='yes')
+			p
+				| No:
+				input#graduated_no(type='radio', name='graduated', value='no')
+			p
+				| Maybe:
+				input#graduated_maybe(type='radio', name='graduated', value='maybe')
+			p
+				| Eye Color:  Green:
+				input(type='radio', name='eyeColor', value='green')
+				| Blue:
+				input(type='radio', name='eyeColor', value='blue')
+				| Brown:
+				input(type='radio', name='eyeColor', value='brown')
+			p
+				| Drivers licence:
+				input(type='checkbox', name='driversLicense')
+				| Motorcycle license:
+				input(type='checkbox', name='motorcycle_license')
+			p
+				| Dog:
+				select(name='dog')
+					option(value='') Please Select
+					option(value='1') Andy
+					option(value='2') Biff
+					option(value='3') Candy
+			p
+				| Big Text:
+				textarea(name='bigText', rows='6', cols='40')

@@ -100,6 +100,19 @@ window.require.define({"test/controllers/form_controller_test": function(exports
   
 }});
 
+window.require.define({"test/controllers/matttest_controller_test": function(exports, require, module) {
+  var Matttest;
+
+  Matttest = require('models/matttest');
+
+  describe('Matttest', function() {
+    return beforeEach(function() {
+      return this.model = new Matttest();
+    });
+  });
+  
+}});
+
 window.require.define({"test/controllers/topCenter_controller_test": function(exports, require, module) {
   var TopCenter;
 
@@ -339,6 +352,7 @@ window.require.define({"test/views/top_left_view": function(exports, require, mo
 
 window.require('test/controllers/footer_controller_test');
 window.require('test/controllers/form_controller_test');
+window.require('test/controllers/matttest_controller_test');
 window.require('test/controllers/topCenter_controller_test');
 window.require('test/controllers/top_left_controller_test');
 window.require('test/models/header_test');

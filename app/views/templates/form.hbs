@@ -1,10 +1,36 @@
-First Name: {{firstName}}
-{{lastName}}
-{{phone}}
-{{height}}
-{{graduated}}
-{{eyeColor}}
-{{driversLicense}}
-{{motorcycle_license}}
-{{dog}}
-{{bigText}}
+<div id="viewContent"></div>
+
+<p>
+	First Name: <input type="text" name="first_name" placeholder="{{first_name}}"/>
+</p>
+<p>
+	Phone:<span class="highlight">(Custom Value Updates) <input type="text" name="phone"/>
+</p>
+<p>
+	Height:<span class="highlight">(Custom No Binding Test) </span> <input type="text" name="height"/>
+</p>
+<p>
+	Graduated:  Yes: <input type="radio" id="graduated_yes" name="graduated" value="yes">
+	No: <input type="radio" id="graduated_no" name="graduated" value="no">
+	Maybe: <input type="radio" id="graduated_maybe" name="graduated" value="maybe">
+</p>
+<p>
+	Eye Color:  Green: <input type="radio" name="eyeColor" value="green">
+	Blue: <input type="radio" name="eyeColor" value="blue">
+	Brown: <input type="radio" name="eyeColor" value="brown">
+</p>
+<p>
+	Motorcycle license: <input type="checkbox" name="motorcycle_license" />
+</p>
+<p>
+Dog: <span class="highlight">(Custom object value binding)</span>
+	<select name="dog">
+		<option value="">Please Select</option>
+		<option value="1">smith</option>
+		<option value="2">Biff</option>
+		<option value="3">Candy</option>
+	</select>
+</p>
+<p>
+	Big Text: <textarea name="bigText" rows="6" cols="40"></textarea>
+</p>

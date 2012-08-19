@@ -218,6 +218,7 @@ window.require.define({"controllers/form_controller": function(exports, require,
     }
 
     FormController.prototype.initialize = function() {
+      FormController.__super__.initialize.apply(this, arguments);
       this.model = new Form();
       return this.view = new FormView({
         model: this.model
@@ -1914,13 +1915,11 @@ window.require.define({"models/form": function(exports, require, module) {
     }
 
     Form.prototype.defaults = {
-      firstName: null,
-      lastName: null,
-      phone: null,
+      first_name: "matt",
+      phone: "407-555-5555",
       height: null,
       graduated: null,
       eyeColor: null,
-      driversLicense: null,
       motorcycle_license: null,
       dog: null,
       bigText: null
@@ -2363,6 +2362,76 @@ window.require.define({"views/form_view": function(exports, require, module) {
 
     FormView.prototype.autoRender = true;
 
+    FormView.prototype.initialize = function() {
+      this._modelBinder = new Backbone.ModelBinder();
+      return this.model.on("change", this.logChange, this);
+    };
+
+    FormView.prototype.render = function() {
+      var bindings, dogs;
+      dogs = new Backbone.Collection({
+        model: Backbone.model
+      });
+      dogs.add({
+        id: 1,
+        name: 'smith',
+        collar: 'yellow'
+      });
+      dogs.add({
+        id: 2,
+        name: 'biff',
+        collar: 'red'
+      });
+      dogs.add({
+        id: 3,
+        name: 'candy',
+        collar: 'green'
+      });
+      bindings = {
+        first_name: '[name=first_name]',
+        motorcycle_license: '[name=motorcycle_license]',
+        graduated: '[name=graduated]',
+        eyeColor: '[name=eyeColor]',
+        phone: {
+          selector: '[name=phone]',
+          converter: this.phoneConverter
+        },
+        dog: {
+          selector: '[name=dog]',
+          converter: (new Backbone.ModelBinder.CollectionConverter(dogs)).convert
+        },
+        bigText: '[name=bigText]'
+      };
+      this.$el.html(template);
+      this._modelBinder.bind(this.model, this.el, bindings);
+      this.$el.find("#viewContent").html("Form Data:<br><p>" + JSON.stringify(this.model.toJSON()) + "</p>");
+      return this;
+    };
+
+    FormView.prototype.logChange = function() {
+      return this.$el.find("#viewContent").html("Form Data:<br><p>" + JSON.stringify(this.model.toJSON()) + "</p>");
+    };
+
+    FormView.prototype.phoneConverter = function(direction, value) {
+      var formattedPhone;
+      if (direction === Backbone.ModelBinder.Constants.ModelToView) {
+        formattedPhone = '';
+        if (value) {
+          formattedPhone = value.replace(/[^0-9]/g, '');
+          if (formattedPhone.length === 7) {
+            formattedPhone = "" + (formattedPhone.substring(0, 3)) + "-" + (formattedPhone.substring(3, 7));
+          } else if (formattedPhone.length === 10) {
+            formattedPhone = "(" + (formattedPhone.substring(0, 3)) + ")-" + (formattedPhone.substring(3, 6)) + "-" + (formattedPhone.substring(6, 10));
+          } else if (formattedPhone.length === 11) {
+            formattedPhone = "1 (" + (formattedPhone.substring(1, 4)) + ")-" + (formattedPhone.substring(4, 7)) + "-" + (formattedPhone.substring(7, 11));
+          }
+          return formattedPhone;
+        }
+      } else {
+        return value.replace(/[^0-9]/g, '');
+      }
+    };
+
     return FormView;
 
   })(View);
@@ -2728,57 +2797,12 @@ window.require.define({"views/templates/form": function(exports, require, module
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "First Name: ";
-    foundHelper = helpers.firstName;
-    stack1 = foundHelper || depth0.firstName;
+    buffer += "<div id=\"viewContent\"></div>\n\n<p>\n	First Name: <input type=\"text\" name=\"first_name\" placeholder=\"";
+    foundHelper = helpers.first_name;
+    stack1 = foundHelper || depth0.first_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "firstName", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.lastName;
-    stack1 = foundHelper || depth0.lastName;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "lastName", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.phone;
-    stack1 = foundHelper || depth0.phone;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "phone", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.height;
-    stack1 = foundHelper || depth0.height;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "height", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.graduated;
-    stack1 = foundHelper || depth0.graduated;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "graduated", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.eyeColor;
-    stack1 = foundHelper || depth0.eyeColor;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "eyeColor", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.driversLicense;
-    stack1 = foundHelper || depth0.driversLicense;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "driversLicense", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.motorcycle_license;
-    stack1 = foundHelper || depth0.motorcycle_license;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "motorcycle_license", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.dog;
-    stack1 = foundHelper || depth0.dog;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "dog", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
-    foundHelper = helpers.bigText;
-    stack1 = foundHelper || depth0.bigText;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "bigText", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "first_name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\"/>\n</p>\n<p>\n	Phone:<span class=\"highlight\">(Custom Value Updates) <input type=\"text\" name=\"phone\"/>\n</p>\n<p>\n	Height:<span class=\"highlight\">(Custom No Binding Test) </span> <input type=\"text\" name=\"height\"/>\n</p>\n<p>\n	Graduated:  Yes: <input type=\"radio\" id=\"graduated_yes\" name=\"graduated\" value=\"yes\">\n	No: <input type=\"radio\" id=\"graduated_no\" name=\"graduated\" value=\"no\">\n	Maybe: <input type=\"radio\" id=\"graduated_maybe\" name=\"graduated\" value=\"maybe\">\n</p>\n<p>\n	Eye Color:  Green: <input type=\"radio\" name=\"eyeColor\" value=\"green\">\n	Blue: <input type=\"radio\" name=\"eyeColor\" value=\"blue\">\n	Brown: <input type=\"radio\" name=\"eyeColor\" value=\"brown\">\n</p>\n<p>\n	Motorcycle license: <input type=\"checkbox\" name=\"motorcycle_license\" />\n</p>\n<p>\nDog: <span class=\"highlight\">(Custom object value binding)</span>\n	<select name=\"dog\">\n		<option value=\"\">Please Select</option>\n		<option value=\"1\">smith</option>\n		<option value=\"2\">Biff</option>\n		<option value=\"3\">Candy</option>\n	</select>\n</p>\n<p>\n	Big Text: <textarea name=\"bigText\" rows=\"6\" cols=\"40\"></textarea>\n</p>\n";
     return buffer;});
 }});
 

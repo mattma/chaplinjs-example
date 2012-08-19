@@ -2,13 +2,12 @@ Model = require 'models/base/model'
 
 module.exports = class Form extends Model
 	defaults:
-		firstName: null
-		lastName: null
-		phone: null
+		first_name: "matt"
+		phone: "407-555-5555"
 		height: null
 		graduated: null
 		eyeColor: null
-		driversLicense: null
 		motorcycle_license: null
 		dog: null
 		bigText: null
+

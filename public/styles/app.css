@@ -143,6 +143,17 @@ td { vertical-align: top; }
   height: auto;
   padding: 20px;
   background: #f1f1f1; }
+  #form #viewContent {
+    height: auto;
+    margin-bottom: 20px; }
+    #form #viewContent p {
+      width: 400px;
+      line-height: 1.4em;
+      color: red;
+      font-size: 1.2em; }
+
+.highlight {
+  color: maroon; }
 .home-page {
   width: 476px;
   height: 130px;

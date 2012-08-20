@@ -16,8 +16,31 @@ module.exports = class FooterView extends View
 		@$el.html template
 		@$el.find("article").html "Model Data:<br>" +  JSON.stringify(@model.toJSON())
 
-		@_modelBinder.bind @model, @el
+		bindings =
+			firstName: [
+				{selector: '[name=firstName]' }
+				{
+					selector: "[name=fullName]"
+					converter: @fullname
+				}
+			]
+
+			lastName: [
+				{selector: '[name=lastName]' }
+				{
+					selector: "[name=fullName]"
+					converter: @fullname
+				}
+			]
+			age:
+				selector: '[name=age]'
+
+		@_modelBinder.bind @model, @el, bindings
 		@
 
 	consoleModel: ->
+		@render()
 		@$el.find("article").html "Model Data:<br>" + JSON.stringify(@model.toJSON())
+
+	fullname: (direction, value, attributes, model)->
+		return model.get("firstName") + ' ' + model.get("lastName")
